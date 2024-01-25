@@ -1,6 +1,7 @@
+#Software Programming Quiz
 CITATIONS:
 
-# for db_connector.py
+For db_connector.py
 Citation Scope: Based on flask-started-app database folder in github, from osu-cs340-ecampus , scope of code is the whole code in the source to setup the database connection, aka whole module below.
 Date: January 25, 2024
 Originality: Copied, we copied all of the osu-cs340-ecampus flask starter code, all of the code
