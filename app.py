@@ -9,12 +9,6 @@ app = Flask(__name__)
 db_connection = db.connect_to_database()
 db_connection.ping(True)
 
-app.config['MYSQL_HOST'] = 'classmysql.engr.oregonstate.edu'
-app.config['MYSQL_USER'] = 'cs340_UserName'
-app.config['MYSQL_PASSWORD'] = 'xxxx' #last 4 of onid
-app.config['MYSQL_DB'] = 'cs340_UserName'
-app.config['MYSQL_CURSORCLASS'] = "DictCursor"
-
 
 mysql = MySQL(app)
 
