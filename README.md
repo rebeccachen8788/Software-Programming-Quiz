@@ -1,4 +1,4 @@
-#Software Programming Quiz
+# Software Programming Quiz
 CITATIONS:
 
 For db_connector.py
