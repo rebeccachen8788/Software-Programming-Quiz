@@ -1,10 +1,5 @@
-# Citation Scope: Based on flask-started-app database folder in github, from osu-cs340-ecampus , scope of code is the whole code in the source to setup the database connection, aka whole module below.
-# Date: January 25, 2024
-# Originality: Copied, we copied all of the osu-cs340-ecampus flask starter code, all of the code
-# below is from the starter code given to the class for CS340, to be used in Capstone.
-# Source : https://github.com/osu-cs340-ecampus/flask-starter-app/blob/master/database/db_connector.py
-
-import MySQLdb
+import mysql.connector
+from mysql.connector import Error
 import os
 from dotenv import load_dotenv, find_dotenv
 
@@ -17,46 +12,44 @@ user = os.environ.get("DBUSER")
 passwd = os.environ.get("PW")
 db = os.environ.get("DB")
 
-def connect_to_database(host = host, user = user, passwd = passwd, db = db):
-    '''
-    connects to a database and returns a database objects
-    '''
-    db_connection = MySQLdb.connect(host,user,passwd,db)
-    return db_connection
 
-def execute_query(db_connection = None, query = None, query_params = ()):
-    '''
-    executes a given SQL query on the given db connection and returns a Cursor object
+def get_db_connection():
+    try:
+        connection = mysql.connector.connect(host=host, database=db, user=user, password=passwd)
+        if connection.is_connected():
+            db_info = connection.get_server_info()
+            print("Connected to MySQL Server version ", db_info)
+            return connection
+    except Error as e:
+        print("Error while connecting to MySQL", e)
+        return None
 
-    db_connection: a MySQLdb connection object created by connect_to_database()
-    query: string containing SQL query
 
-    returns: A Cursor object as specified at https://www.python.org/dev/peps/pep-0249/#cursor-objects.
-    You need to run .fetchall() or .fetchone() on that object to actually acccess the results.
+def execute_query(db_connection=None, query=None, query_params=()):
+    """
+    Executes a given SQL query on the given db connection and optionally returns a Cursor object.
 
-    '''
+    :param db_connection: a mysql.connector connection object.
+    :param query: string containing SQL query.
+    :param query_params: parameters to pass along with the query for safe execution.
 
+    :return: A Cursor object on success, None on failure.
+    """
     if db_connection is None:
-        print("No connection to the database found! Have you called connect_to_database() first?")
+        print("No connection to the database found!")
         return None
 
     if query is None or len(query.strip()) == 0:
-        print("query is empty! Please pass a SQL query in query")
+        print("Query is empty! Please pass a SQL query in query.")
         return None
 
-    print("Executing %s with %s" % (query, query_params));
-    # Create a cursor to execute query. Why? Because apparently they optimize execution by retaining a reference according to PEP0249
-    cursor = db_connection.cursor(MySQLdb.cursors.DictCursor)
-
-    '''
-    params = tuple()
-    #create a tuple of paramters to send with the query
-    for q in query_params:
-        params = params + (q)
-    '''
-    #TODO: Sanitize the query before executing it!!!
-    cursor.execute(query, query_params)
-    # this will actually commit any changes to the database. without this no
-    # changes will be committed!
-    db_connection.commit();
-    return cursor
+    try:
+        cursor = db_connection.cursor(dictionary=True)  # Use dictionary=True to get DictCursor functionality
+        print(f"Executing {query} with {query_params}")
+        cursor.execute(query, query_params)
+        db_connection.commit()  # Commit to save changes to the database
+        return cursor
+    except Error as e:
+        print(f"Error occurred: {e}")
+        db_connection.rollback()  # Rollback in case of any error
+        return None
