@@ -9,7 +9,7 @@ load_dotenv(find_dotenv())
 # Set the variables in our application with those environment variables
 host = os.environ.get("HOST")
 user = os.environ.get("DBUSER")
-passwd = os.environ.get("PASSWORD")
+passwd = os.environ.get("PW")
 db = os.environ.get("DB")
 
 
