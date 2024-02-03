@@ -13,15 +13,7 @@ bp = Blueprint('auth', __name__, url_prefix='/')
 
 # User registration and login
 @bp.route('/signup', methods=['GET', 'POST'])
-def signup():
-    
-    # # db test
-    # db = get_db_connection()
-    # cursor = db.cursor()
-    # cursor.execute("SELECT * FROM Quiz_Creator;")
-    # for i in cursor:
-    #     print(i)
-    # cursor.close()    
+def signup():   
     
     if request.method == 'POST':
         email = request.form['email']
@@ -47,20 +39,14 @@ def signup():
         # attempt to insert the new user into the database
         if not error: 
             try:
-                secure_password = generate_password_hash(password1)
+                secure_password = generate_password_hash(password1) 
                 db = get_db_connection()
-                cursor = db.cursor()
-                cursor.execute(query, (email, secure_password, fn, ln)) 
-                db.commit()               
-            except:
+                user = execute_query(db, query, (email, secure_password, fn, ln)) 
+            except not user:
                 error = "An account with this email already exists. Please use the login form."
             else:
-                query = "SELECT creatorID FROM Quiz_Creator WHERE creatorEmail=(%s);"
-                cursor.execute(query, (email,))
-                session.clear()
-                session['user_id'] = cursor.fetchone()
-                flash("Account created!")
-                return redirect(url_for("root"))
+                flash("Account created! Please log in to access your account.")
+                return redirect(url_for("auth.login"))
         flash(error)
     return render_template('/signup.html')
         
@@ -71,24 +57,25 @@ def login():
         email = request.form['email']
         password = request.form['password']
         error = None
-        query = "SELECT creatorID, password FROM Quiz_Creator WHERE creatorEmail = (%s);"
-        db = get_db_connection()
-        cursor = db.cursor()
-        cursor.execute(query, (email,))
-        user = cursor.fetchone()
         
+        query = "SELECT creatorID, password FROM Quiz_Creator WHERE creatorEmail = %s;"
+        db = get_db_connection()
+        cursor = db.cursor(dictionary=True)
+        cursor.execute(query, (email,)) 
         # validate username and password combo
+        user = cursor.fetchone()
+        cursor.close()
+        db.close()
         if user:
-            if check_password_hash(user[1], password):
+            if check_password_hash(user['password'], password):
                 session.clear()
-                session['user_id'] = user[0]
+                session['user_id'] = user['creatorID']
                 return redirect(url_for('root'))
             else:
                 error = "Incorrect password."
         else: 
             error = "Email not found."
         flash(error)      
-    
     return render_template('/login.html')
 
 # logout
@@ -107,9 +94,11 @@ def load_logged_in_user():
     else:
         query = 'SELECT * FROM Quiz_Creator WHERE creatorID = %s'
         db = get_db_connection()
-        cursor = db.cursor()
+        cursor = db.cursor(dictionary=True)
         cursor.execute(query, (user_id,))
         g.user = cursor.fetchone()
+        cursor.close()
+        db.close()
 
 # redirects to login/signup page if user is not authenticated
 def login_required(view):
