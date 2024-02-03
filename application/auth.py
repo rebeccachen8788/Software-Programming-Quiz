@@ -11,79 +11,112 @@ bp = Blueprint('auth', __name__, url_prefix='/')
 
 
 
-# User registration
+# User registration and login
+@bp.route('/signup', methods=['GET', 'POST'])
+def signup():
+    
+    # # db test
+    # db = get_db_connection()
+    # cursor = db.cursor()
+    # cursor.execute("SELECT * FROM Quiz_Creator;")
+    # for i in cursor:
+    #     print(i)
+    # cursor.close()    
+    
+    if request.method == 'POST':
+        email = request.form['email']
+        password1 = request.form['password1']
+        password2 = request.form['password2']
+        fn = request.form['firstName']
+        ln = request.form['lastName']
+        error = None
+        
+        # form validation
+        if not email:
+            error = 'Email is required.'
+        elif not password1:
+            error = 'Password is required.'
+        elif password1 != password2:
+            error = 'Passwords do not match.'
+        elif len(password1) < 8:
+            error = "Password must be at least 8 characters long."
+        # WIP -> elif other password requirements
+        else:
+            query = "INSERT INTO Quiz_Creator (creatorEmail, password, firstName, lastName) VALUES (%s, %s, %s, %s);"
+        
+        # attempt to insert the new user into the database
+        if not error: 
+            try:
+                secure_password = generate_password_hash(password1)
+                db = get_db_connection()
+                cursor = db.cursor()
+                cursor.execute(query, (email, secure_password, fn, ln)) 
+                db.commit()               
+            except:
+                error = "An account with this email already exists. Please use the login form."
+            else:
+                query = "SELECT creatorID FROM Quiz_Creator WHERE creatorEmail=(%s);"
+                cursor.execute(query, (email,))
+                session.clear()
+                session['user_id'] = cursor.fetchone()
+                flash("Account created!")
+                return redirect(url_for("root"))
+        flash(error)
+    return render_template('/signup.html')
+        
+# User login
 @bp.route('/login', methods=['GET', 'POST'])
-def register():
-    
-    # db test
-    db = get_db_connection()
-    cursor = db.cursor()
-    cursor.execute("SELECT * FROM Quiz_Creator;")
-    for i in cursor:
-        print(i)
-    cursor.close()    
-    
-    
-    
-    # if request.method == 'POST':
-    #     email = request.form['email']
-    #     password = request.form['password']
-    #     fn = request.form['firstName']
-    #     ln = request.form['lastName']
-    #     error = None
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        error = None
+        query = "SELECT creatorID, password FROM Quiz_Creator WHERE creatorEmail = (%s);"
+        db = get_db_connection()
+        cursor = db.cursor()
+        cursor.execute(query, (email,))
+        user = cursor.fetchone()
         
-    #     # form validation
-    #     if not email:
-    #         error = 'Email is required.'
-    #     elif not password:
-    #         error = 'Password is required.'
-    #     # WIP -> elif other password requirements
-    #     else:
-    #         password = generate_password_hash(password)
-    #         query = "INSERT INTO Quiz_Creator (creatorEmail, password, firstName, lastName) VALUES {%s, %s, %s, %s};"
-        
-    #     # attempt to insert the new user into the database
-    #     if not error: 
-    #         try:
-    #             cursor = execute_query(db_connection=None, query=query, query_params=(email, password, fn, ln))
-    #             user = cursor.fetchall()
-
-                
-    #         except not user:
-    #             error = "Email already exists. Please use the login form."
-    #         else:
-    #             query = "SELECT creatorID FROM Quiz_Creator WHERE creatorEmail={%s};"
-    #             session.clear()
-    #             # cursor = execute_query(db)
-    #             # session['user_id'] = 
-    #             return redirect(url_for("home"))
-    #     flash(error)
-    #     print()
+        # validate username and password combo
+        if user:
+            if check_password_hash(user[1], password):
+                session.clear()
+                session['user_id'] = user[0]
+                return redirect(url_for('root'))
+            else:
+                error = "Incorrect password."
+        else: 
+            error = "Email not found."
+        flash(error)      
+    
     return render_template('/login.html')
-        
-# # User login
-# @bp.route('/login', methods=['GET', 'POST'])
-# def login():
-#     if request.method == 'POST':
-#         email = request.form['email']
-#         password = request.form['password']
-#         db = connect_to_database
-#         error = None
-#         query = "SELECT * FROM Quiz_Creator WHERE creatorEmail = '{%s}';"
-#         user = db.execute(query, (email))
-        
-#         # validate username and password combo
-#         if not user:
-#             error = "No existing accounts with this email address."
-#         elif not check_password_hash(user['password'], password):
-#             error = "Incorrect password."
-        
-#         if error is None:
-#             session.clear()
-#             session['user_id'] = user['creatorID']
-#             return redirect(url_for('home'))
 
-#         flash(error)      
+# logout
+@bp.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('auth.login'))
+
+# checks if a user id is stored in the session
+@bp.before_app_request
+def load_logged_in_user():
+    user_id = session.get('user_id')
     
-#     return render_template('/login.html')
+    if not user_id:
+        g.user = None
+    else:
+        query = 'SELECT * FROM Quiz_Creator WHERE creatorID = %s'
+        db = get_db_connection()
+        cursor = db.cursor()
+        cursor.execute(query, (user_id,))
+        g.user = cursor.fetchone()
 
+# redirects to login/signup page if user is not authenticated
+def login_required(view):
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if not g.user:
+            return redirect(url_for('auth.login'))
+        return view(**kwargs)
+    
+    return wrapped_view
