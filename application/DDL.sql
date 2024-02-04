@@ -16,7 +16,7 @@ DROP TABLE IF EXISTS Quiz_Creator;
 CREATE OR REPLACE TABLE Quiz_Creator (
     creatorID INT AUTO_INCREMENT UNIQUE NOT NULL,
     creatorEmail VARCHAR(70) UNIQUE NOT NULL,
-    password VARCHAR(20) NOT NULL,
+    password VARCHAR(1000) NOT NULL,
     firstName VARCHAR(50) NOT NULL,
     lastName VARCHAR(50) NOT NULL,
     PRIMARY KEY (creatorID)
