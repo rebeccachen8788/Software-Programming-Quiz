@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+</head>
+<body>
+    <form method="POST" action="/create_quiz">
+        <label for="questionType">Select Question Type:</label>
+        <select name="questionType" id="questionType" onchange="this.form.submit()">
+            <option value="">--Choose a Type--</option>
+            <option value="true_false">True/False</option>
+            <option value="multiple_choice">Multiple Choice</option>
+            <option value="check_all">Check all that apply</option>
+            <option value="freeform">Freeform</option>
+        </select>
+    </form>
+
+    {% if question_type %}
+        <form method="POST" action="/submit_question">
+            <!-- Additional form fields based on question_type -->
+            {% if question_type == 'true_false' %}
+                <label for="questionText" class="form-label">Question Text:</label>
+                <input type="text" name="questionText" class="form-control" id="questionText" required>
+                <fieldset>
+                    <legend>Answer Choices:</legend>
+                    <div>
+                        <input type="radio" id="true" name="correctAnswer[]" value="True" required>
+                        <label for="true">True</label>
+                    </div>
+                    <div>
+                        <input type="radio" id="false" name="correctAnswer[]" value="False" required>
+                        <label for="false">False</label>
+                    </div>
+                </fieldset>
+                <!-- True/False question fields -->
+           {% elif question_type == 'multiple_choice' %}
+                <label for="questionText">Question Text:</label>
+                <input type="text" name="questionText" required>
+
+                <legend>Answer Choices:</legend>
+                <div class="mb-3">
+                    <input type="radio" id="correctAnswer1" name="correctAnswer[]" value="answer1" required>
+                    <label for="correctAnswer1" class="form-label">Answer 1</label>
+                    <input type="text" class="form-control" name="answer1" id="textAnswer1" placeholder="Type answer option here">
+                </div>
+                <div class="mb-3">
+                    <input type="radio" id="correctAnswer2" name="correctAnswer[]" value="answer2" required>
+                    <label for="correctAnswer2" class="form-label">Answer 2</label>
+                    <input type="text" class="form-control" name="answer2" id="textAnswer2" placeholder="Type answer option here">
+                </div>
+                <div class="mb-3">
+                    <input type="radio" id="correctAnswer3" name="correctAnswer[]" value="answer3" required>
+                    <label for="correctAnswer3" class="form-label">Answer 3</label>
+                    <input type="text" class="form-control" name="answer3" id="textAnswer3" placeholder="Type answer option here">
+                </div>
+                <div class="mb-3">
+                    <input type="radio" id="correctAnswer4" name="correctAnswer[]" value="answer4" required>
+                    <label for="correctAnswer4" class="form-label">Answer 4</label>
+                    <input type="text" class="form-control" name="answer4" id="textAnswer4" placeholder="Type answer option here">
+                </div>
+            {% elif question_type == 'check_all' %}
+                <label for="questionText">Question Text:</label>
+                <input type="text" name="questionText" id="mquestionText" required>
+
+                <legend>Answer Choices:</legend>
+                <div class="mb-3">
+                    <input type="checkbox" id="mcorrectAnswer1" name="correctAnswer[]" value="answer1">
+                    <label for="correctAnswer1" class="form-label">Answer 1</label>
+                    <input type="text" class="form-control" name="answer1" id="mtextAnswer1" placeholder="Type answer option here">
+                </div>
+                <div class="mb-3">
+                    <input type="checkbox" id="mcorrectAnswer2" name="correctAnswer[]" value="answer2">
+                    <label for="correctAnswer2" class="form-label">Answer 2</label>
+                    <input type="text" class="form-control" name="answer2" id="mtextAnswer2" placeholder="Type answer option here">
+                </div>
+                <div class="mb-3">
+                    <input type="checkbox" id="mcorrectAnswer3" name="correctAnswer[]" value="answer3">
+                    <label for="correctAnswer3" class="form-label">Answer 3</label>
+                    <input type="text" class="form-control" name="answer3" id="mtextAnswer3" placeholder="Type answer option here">
+                </div>
+                <div class="mb-3">
+                    <input type="checkbox" id="mcorrectAnswer4" name="correctAnswer[]" value="answer4">
+                    <label for="correctAnswer4" class="form-label">Answer 4</label>
+                    <input type="text" class="form-control" name="answer4" id="mtextAnswer4" placeholder="Type answer option here">
+                </div>
+
+            {% elif question_type == 'freeform' %}
+                <label for="questionText">Question Text:</label>
+                <input type="text" name="questionText" required>
+            {% endif %}
+            <button type="submit">Submit Question</button>
+        </form>
+    {% endif %}
+</body>
+</html>
