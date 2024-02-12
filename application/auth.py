@@ -11,7 +11,7 @@ bp = Blueprint('auth', __name__, url_prefix='/')
 
 
 
-# User registration and login
+# User sign up
 @bp.route('/signup', methods=['GET', 'POST'])
 def signup():   
     
@@ -25,13 +25,14 @@ def signup():
         
         # form validation
         if not email:
-            error = 'Email is required.'
+            error = 'Signup Error: Email is required.'
         elif not password1:
-            error = 'Password is required.'
+            error = 'Signup Error: Password is required.'
         elif password1 != password2:
-            error = 'Passwords do not match.'
+            error = 'Signup Error: Passwords do not match.'
         elif len(password1) < 8:
-            error = "Password must be at least 8 characters long."
+            error = "Signup Error: Password must be at least 8 characters long."
+            print(error)
         # WIP -> elif other password requirements
         else:
             query = "INSERT INTO Quiz_Creator (creatorEmail, password, firstName, lastName) VALUES (%s, %s, %s, %s);"
@@ -43,12 +44,15 @@ def signup():
                 db = get_db_connection()
                 user = execute_query(db, query, (email, secure_password, fn, ln)) 
             except not user:
-                error = "An account with this email already exists. Please use the login form."
+                error = "Signup Error: An account with this email already exists."
             else:
-                flash("Account created! Please log in to access your account.")
-                return redirect(url_for("auth.login"))
+                info = "Signup Successful: Please log in to your account."
+                flash(info)
+                return redirect(url_for('root'))
+            finally:
+                db.close()
         flash(error)
-    return render_template('/signup.html')
+    return render_template('/login-signup.html')
         
 # User login
 @bp.route('/login', methods=['GET', 'POST'])
@@ -76,12 +80,13 @@ def login():
         else: 
             error = "Email not found."
         flash(error)      
-    return render_template('/login.html')
+    return render_template('/login-signup.html')
 
 # logout
 @bp.route('/logout')
 def logout():
     session.clear()
+    print("session cleared")
     return redirect(url_for('auth.login'))
 
 # checks if a user id is stored in the session
@@ -100,12 +105,12 @@ def load_logged_in_user():
         cursor.close()
         db.close()
 
-# redirects to login/signup page if user is not authenticated
+# redirects to login/signup page if user is not authenticated when @login_required decorator used
 def login_required(view):
     @functools.wraps(view)
     def wrapped_view(**kwargs):
         if not g.user:
-            return redirect(url_for('auth.login'))
+            return redirect(url_for('auth.signup'))
         return view(**kwargs)
     
     return wrapped_view
