@@ -23,7 +23,7 @@ def create_app(test_config=None):
     from .auth import login_required
     
     @app.route("/")
-    @login_required
+    # @login_required -> prevents unauthenticated users from accessing this page
     def root():
         return render_template("homepage.html")
 

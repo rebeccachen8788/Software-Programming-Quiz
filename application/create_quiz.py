@@ -6,7 +6,7 @@ bp = Blueprint('create_quiz', __name__, url_prefix='/')
 
 
 @bp.route('/create_quiz', methods=['GET', 'POST'])
-@login_required
+# @login_required -> prevents unauthenticated users from accessing this page
 def create_q():
     if request.method == 'POST':
         # Process the selected question type and prepare the next part of the form
@@ -18,7 +18,7 @@ def create_q():
 
 
 @bp.route('/submit_question', methods=['POST'])
-@login_required
+# @login_required -> prevents unauthenticated users from accessing this page
 def submit_question():
     question_text = request.form.get('questionText')
     correct_answers = request.form.getlist('correctAnswer[]')
