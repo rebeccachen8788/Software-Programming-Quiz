@@ -6,94 +6,246 @@
     <title>Home Page</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <!-- jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 </head>
 <body>
-    <form method="POST" action="/create_quiz">
+    <!-- True/False template-->
+    <div class="template-form" id="template-true-false" style="display: none" questionType=>
+        <label for="questionText" class="form-label">Question Text:</label>
+        <input type="text" name="questionText" class="form-control" id="questionText" required>
+        <fieldset>
+            <legend>Answer Choices:</legend>
+            <div>
+                <input type="radio" id="true" name="correctAnswer[]" value="True" required>
+                <label for="true">True</label>
+            </div>
+            <div>
+                <input type="radio" id="false" name="correctAnswer[]" value="False" required>
+                <label for="false">False</label>
+            </div>
+        </fieldset>
+        <br />
+        <input type="hidden" name="questionType" value="true-false">
+
+    </div>
+
+    <!-- Multiple Choice template-->
+    <div class="template-form" id="template-multiple-choice" style="display: none">
+        <label for="questionText">Question Text:</label>
+        <input type="text" name="questionText" required>
+
+        <legend>Answer Choices:</legend>
+        <div class="mb-3">
+            <input type="radio" id="correctAnswer1" name="correctAnswer[]" value="answer1" required>
+            <label for="correctAnswer1" class="form-label">Answer 1</label>
+            <input type="text" class="form-control" name="answer1" id="textAnswer1" placeholder="Type answer option here">
+        </div>
+        <div class="mb-3">
+            <input type="radio" id="correctAnswer2" name="correctAnswer[]" value="answer2" required>
+            <label for="correctAnswer2" class="form-label">Answer 2</label>
+            <input type="text" class="form-control" name="answer2" id="textAnswer2" placeholder="Type answer option here">
+        </div>
+        <div class="mb-3">
+            <input type="radio" id="correctAnswer3" name="correctAnswer[]" value="answer3" required>
+            <label for="correctAnswer3" class="form-label">Answer 3</label>
+            <input type="text" class="form-control" name="answer3" id="textAnswer3" placeholder="Type answer option here">
+        </div>
+        <div class="mb-3">
+            <input type="radio" id="correctAnswer4" name="correctAnswer[]" value="answer4" required>
+            <label for="correctAnswer4" class="form-label">Answer 4</label>
+            <input type="text" class="form-control" name="answer4" id="textAnswer4" placeholder="Type answer option here">
+        </div>
+        <br />
+        <input type="hidden" name="questionType" value="multiple-choice">
+    </select>
+    </div>
+
+    <!-- Check All template-->
+    <div class="template-form" id="template-check-all" style="display: none">
+        <label for="questionText">Question Text:</label>
+        <input type="text" name="questionText" id="mquestionText" required>
+
+        <legend>Answer Choices:</legend>
+        <div class="mb-3">
+            <input type="checkbox" id="mcorrectAnswer1" name="correctAnswer[]" value="answer1">
+            <label for="correctAnswer1" class="form-label">Answer 1</label>
+            <input type="text" class="form-control" name="answer1" id="mtextAnswer1" placeholder="Type answer option here">
+        </div>
+        <div class="mb-3">
+            <input type="checkbox" id="mcorrectAnswer2" name="correctAnswer[]" value="answer2">
+            <label for="correctAnswer2" class="form-label">Answer 2</label>
+            <input type="text" class="form-control" name="answer2" id="mtextAnswer2" placeholder="Type answer option here">
+        </div>
+        <div class="mb-3">
+            <input type="checkbox" id="mcorrectAnswer3" name="correctAnswer[]" value="answer3">
+            <label for="correctAnswer3" class="form-label">Answer 3</label>
+            <input type="text" class="form-control" name="answer3" id="mtextAnswer3" placeholder="Type answer option here">
+        </div>
+        <div class="mb-3">
+            <input type="checkbox" id="mcorrectAnswer4" name="correctAnswer[]" value="answer4">
+            <label for="correctAnswer4" class="form-label">Answer 4</label>
+            <input type="text" class="form-control" name="answer4" id="mtextAnswer4" placeholder="Type answer option here">
+        </div>
+        <br />
+        <input type="hidden" name="questionType" value="check-all">
+
+    </div>
+
+    <!-- Freeform template-->
+    <div class="template-form" id="template-freeform" style="display: none">
+        <label for="questionText">Question Text:</label>
+            <input type="text" name="questionText" required>
+        <br />
+        <input type="hidden" name="questionType" value="freeform">
+
+    </div>
+
+    <form id="quiz" method="POST" action="{{ url_for('create_quiz.create_q') }}">
+    <!-- Container for subforms -->
+    <div id="subforms-container">
+    </div>
+
+    <!-- question type and add button -->
         <label for="questionType">Select Question Type:</label>
-        <select name="questionType" id="questionType" onchange="this.form.submit()">
+        <select name="questionType" id="questionType">
             <option value="">--Choose a Type--</option>
-            <option value="true_false">True/False</option>
-            <option value="multiple_choice">Multiple Choice</option>
-            <option value="check_all">Check all that apply</option>
+            <option value="true-false">True/False</option>
+            <option value="multiple-choice">Multiple Choice</option>
+            <option value="check-all">Check all that apply</option>
             <option value="freeform">Freeform</option>
         </select>
+        <button type="button" id="add">Add</button>
+    <button type="submit" id="submit" class="btn btn-primary">Submit Quiz</button>
     </form>
-
-    {% if question_type %}
-        <form method="POST" action="/submit_question">
-            <!-- Additional form fields based on question_type -->
-            {% if question_type == 'true_false' %}
-                <label for="questionText" class="form-label">Question Text:</label>
-                <input type="text" name="questionText" class="form-control" id="questionText" required>
-                <fieldset>
-                    <legend>Answer Choices:</legend>
-                    <div>
-                        <input type="radio" id="true" name="correctAnswer[]" value="True" required>
-                        <label for="true">True</label>
-                    </div>
-                    <div>
-                        <input type="radio" id="false" name="correctAnswer[]" value="False" required>
-                        <label for="false">False</label>
-                    </div>
-                </fieldset>
-                <!-- True/False question fields -->
-           {% elif question_type == 'multiple_choice' %}
-                <label for="questionText">Question Text:</label>
-                <input type="text" name="questionText" required>
-
-                <legend>Answer Choices:</legend>
-                <div class="mb-3">
-                    <input type="radio" id="correctAnswer1" name="correctAnswer[]" value="answer1" required>
-                    <label for="correctAnswer1" class="form-label">Answer 1</label>
-                    <input type="text" class="form-control" name="answer1" id="textAnswer1" placeholder="Type answer option here">
-                </div>
-                <div class="mb-3">
-                    <input type="radio" id="correctAnswer2" name="correctAnswer[]" value="answer2" required>
-                    <label for="correctAnswer2" class="form-label">Answer 2</label>
-                    <input type="text" class="form-control" name="answer2" id="textAnswer2" placeholder="Type answer option here">
-                </div>
-                <div class="mb-3">
-                    <input type="radio" id="correctAnswer3" name="correctAnswer[]" value="answer3" required>
-                    <label for="correctAnswer3" class="form-label">Answer 3</label>
-                    <input type="text" class="form-control" name="answer3" id="textAnswer3" placeholder="Type answer option here">
-                </div>
-                <div class="mb-3">
-                    <input type="radio" id="correctAnswer4" name="correctAnswer[]" value="answer4" required>
-                    <label for="correctAnswer4" class="form-label">Answer 4</label>
-                    <input type="text" class="form-control" name="answer4" id="textAnswer4" placeholder="Type answer option here">
-                </div>
-            {% elif question_type == 'check_all' %}
-                <label for="questionText">Question Text:</label>
-                <input type="text" name="questionText" id="mquestionText" required>
-
-                <legend>Answer Choices:</legend>
-                <div class="mb-3">
-                    <input type="checkbox" id="mcorrectAnswer1" name="correctAnswer[]" value="answer1">
-                    <label for="correctAnswer1" class="form-label">Answer 1</label>
-                    <input type="text" class="form-control" name="answer1" id="mtextAnswer1" placeholder="Type answer option here">
-                </div>
-                <div class="mb-3">
-                    <input type="checkbox" id="mcorrectAnswer2" name="correctAnswer[]" value="answer2">
-                    <label for="correctAnswer2" class="form-label">Answer 2</label>
-                    <input type="text" class="form-control" name="answer2" id="mtextAnswer2" placeholder="Type answer option here">
-                </div>
-                <div class="mb-3">
-                    <input type="checkbox" id="mcorrectAnswer3" name="correctAnswer[]" value="answer3">
-                    <label for="correctAnswer3" class="form-label">Answer 3</label>
-                    <input type="text" class="form-control" name="answer3" id="mtextAnswer3" placeholder="Type answer option here">
-                </div>
-                <div class="mb-3">
-                    <input type="checkbox" id="mcorrectAnswer4" name="correctAnswer[]" value="answer4">
-                    <label for="correctAnswer4" class="form-label">Answer 4</label>
-                    <input type="text" class="form-control" name="answer4" id="mtextAnswer4" placeholder="Type answer option here">
-                </div>
-
-            {% elif question_type == 'freeform' %}
-                <label for="questionText">Question Text:</label>
-                <input type="text" name="questionText" required>
-            {% endif %}
-            <button type="submit">Submit Question</button>
-        </form>
-    {% endif %}
 </body>
 </html>
+
+<script>
+// Define an object to store question IDs and their corresponding correct answers
+var correctAnswers = {};
+var answers = {};
+
+
+function addForm() {
+    var questionType = $('#questionType').val();
+    var $templateForm = $('#template-' + questionType);
+    console.log(questionType);
+    if ($templateForm.length === 0) {
+        console.log('[ERROR] Cannot find template');
+        return;
+    }
+
+    // Get Last index
+    var $lastForm = $('.subform').last();
+
+    var newIndex = 0;
+
+    if ($lastForm.length > 0) {
+        newIndex = parseInt($lastForm.data('index')) + 1;
+    }
+
+    // Maximum of 50 questions
+    if (newIndex >= 50) {
+        console.log('[WARNING] Reached maximum number of questions');
+        return;
+    }
+
+    // Add elements
+    var $newForm = $templateForm.clone().show();
+
+    $newForm.attr('id', 'subform-' + newIndex); // Assign a unique ID to the new form
+    $newForm.addClass('subform'); // Add the 'subform' class to the new form
+    $newForm.data('index', newIndex);
+
+    $newForm.find('label, input, select, textarea').each(function(idx) {
+        var $item = $(this);
+
+        if ($item.is('label')) {
+            // Update labels
+            var forAttr = $item.attr('for');
+            if (forAttr) {
+                var newForAttr = forAttr.replace(/^(template-)(.*?)(-)/, 'subform-' + newIndex + '-$2-');
+                $item.attr('for', newForAttr);
+            }
+            return;
+        }
+
+        // Update other fields
+        $item.attr('id', 'subform-' + newIndex + '-' + $item.attr('name'));
+        $item.attr('name', 'subform-' + newIndex + '-' + $item.attr('name'));
+    });
+
+    // Append
+    $('#subforms-container').append($newForm);
+    $newForm.addClass('subform');
+    $newForm.removeClass('is-hidden');
+
+    // Associate correct answer(s) with the question ID
+    var questionId = 'subform-' + newIndex;
+    var correctAnswer = $newForm.find('input[name="correctAnswer[]"]:checked').val();
+    correctAnswers[questionId] = correctAnswer;
+
+    $newForm.find('.remove').click(removeForm);
+}
+
+
+// Function to remove a form
+function removeForm() {
+    var $removedForm = $(this).closest('.subform');
+    var removedIndex = parseInt($removedForm.data('index'));
+    var questionId = 'subform-' + removedIndex;
+
+    $removedForm.remove();
+
+    // Remove the associated correct answer when removing the form
+    delete correctAnswers[questionId];
+
+    // Update indices
+    adjustIndices(removedIndex);
+}
+
+// Function to adjust the indices of form fields when removing items
+function adjustIndices(removedIndex) {
+    var $forms = $('.subform');
+
+    $forms.each(function(i) {
+        var $form = $(this);
+        var index = parseInt($form.data('index'));
+        var newIndex = index - 1;
+
+        if (index < removedIndex) {
+            // Skip
+            return true;
+        }
+
+        // Update IDs in form fields
+        $form.attr('id', 'subform-' + newIndex);
+        $form.data('index', newIndex);
+
+        $form.find('label, input, select, textarea').each(function(j) {
+            var $item = $(this);
+
+            if ($item.is('label')) {
+                // Update labels
+                $item.attr('for', 'subform-' + newIndex + '-' + $item.attr('for'));
+                return;
+            }
+
+            // Update other fields
+            $item.attr('id', 'subform-' + newIndex + '-' + $item.attr('id'));
+            $item.attr('name', 'subform-' + newIndex + '-' + $item.attr('name'));
+        });
+    });
+}
+
+
+
+
+$(document).ready(function() {
+    $('#add').click(addForm); // Bind addForm function to click event of Add button
+    $('.remove').click(removeForm);
+});
+</script>
+
+
