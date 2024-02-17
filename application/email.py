@@ -2,14 +2,13 @@
 
 from flask import Blueprint, render_template, request
 from mailjet_rest import Client
-import os
 import uuid
 
 email_bp = Blueprint('email', __name__)
 
 # Configure Mailjet API keys
-API_KEY = os.environ['MAILJET_API_KEY']
-API_SECRET = os.environ['MAILJET_API_SECRET']
+API_KEY = '4f4724f09fd7d7127aa5f0d5d17fed1d'
+API_SECRET = 'e069a58167f81de0de76dfb6ec4c3255'
 mailjet = Client(auth=(API_KEY, API_SECRET), version='v3.1')
 
 
