@@ -1,12 +1,13 @@
-# SOURCE: https://mailtrap.io/blog/python-send-email/#How-to-send-emails-to-multiple-recipients-using-Python
+# SOURCE: https://github.com/mailjet/mailjet-apiv3-python?tab=readme-ov-file#simple-post-request
 
 from flask import Blueprint, render_template, request
 from mailjet_rest import Client
 import uuid
 
-email_bp = Blueprint('email', __name__)
+bp = Blueprint('email', __name__)
 
 # Configure Mailjet API keys
+# This keys are form the account I created.
 API_KEY = '4f4724f09fd7d7127aa5f0d5d17fed1d'
 API_SECRET = 'e069a58167f81de0de76dfb6ec4c3255'
 mailjet = Client(auth=(API_KEY, API_SECRET), version='v3.1')
@@ -50,7 +51,7 @@ def send_email(names, email_addresses, messages):
 
 
 # Render quiz access page with mock data
-@email_bp.route('/quiz_send', methods=['GET', 'POST'])
+@bp.route('/quiz_send', methods=['GET', 'POST'])
 def quiz_send():
     if request.method == 'POST':
         names = request.form.getlist('name[]')
@@ -72,6 +73,6 @@ def quiz_send():
     else:
         return render_template('quiz_send.html')
 
-@email_bp.route('/email_sent', methods=['GET', 'POST'])
+@bp.route('/email_sent', methods=['GET', 'POST'])
 def email_sent():
     return render_template('email_sent.html')

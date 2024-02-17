@@ -20,8 +20,8 @@ def create_app(test_config=None):
     from . import create_quiz
     app.register_blueprint(create_quiz.bp)
     
-    from .email import email_bp
-    app.register_blueprint(email_bp)
+    from . import email
+    app.register_blueprint(email.bp)
 
     # from .auth import login_required
     
