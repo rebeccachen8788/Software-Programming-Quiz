@@ -20,7 +20,10 @@ def create_app(test_config=None):
     from . import create_quiz
     app.register_blueprint(create_quiz.bp)
     
+    from .auth import login_required
+    
     @app.route("/")
+    # @login_required -> prevents unauthenticated users from accessing this page
     def root():
         return render_template("homepage.html")
 
