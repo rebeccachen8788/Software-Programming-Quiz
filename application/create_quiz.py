@@ -105,3 +105,42 @@ def create_quiz():
             print("Form validation failed. Form errors:", form.errors)  # Debug: Print form errors
     return render_template('create_quiz.html', form=form)
 
+
+'''
+@bp.route('/submit_question', methods=['POST'])
+# @login_required -> prevents unauthenticated users from accessing this page
+def submit_question():
+    question_text = request.form.get('questionText')
+    correct_answers = request.form.getlist('correctAnswer[]')
+    answer1 = request.form.get('answer1')
+    answer2 = request.form.get('answer2')
+    answer3 = request.form.get('answer3')
+    answer4 = request.form.get('answer4')
+
+    if not correct_answers:
+        # make this a pop up message for the user
+        print("Please select correct answers")
+        return redirect(url_for('create_quiz.create_q'))
+
+    c_answers = []
+    for val in correct_answers:
+        if val == 'answer1':
+            c_answers.append(answer1)
+        elif val == 'answer2':
+            c_answers.append(answer2)
+        elif val == 'answer3':
+            c_answers.append(answer3)
+        elif val == 'answer4':
+            c_answers.append(answer4)
+        elif val == 'True':
+            c_answers.append('True')
+        elif val == 'False':
+            c_answers.append('False')
+    print("remade:", c_answers)
+    # Here, you would save the question and correct answer to your database
+    # For demonstration, let's just print them
+    print(f"Question: {question_text}, Correct Answer: {correct_answers}, Answer1: {answer1}, Answer2: {answer2},"
+          f"Answer3: {answer3}, Answer4: {answer4}")
+
+    # Redirect to the quiz creation page or to a confirmation page
+    return redirect(url_for('create_quiz.create_q'))'''
