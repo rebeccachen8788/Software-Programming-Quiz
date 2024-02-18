@@ -101,8 +101,8 @@
 
     </div>
 
-    <form id="quiz" method="POST" action="{{ url_for('create_quiz.create_q') }}">
-    <!-- Container for subforms -->
+    <form id="quiz" method="POST" action="">
+        <!-- Container for subforms -->
     <div id="subforms-container">
     </div>
 
@@ -117,6 +117,7 @@
         </select>
         <button type="button" id="add">Add</button>
     <button type="submit" id="submit" class="btn btn-primary">Submit Quiz</button>
+    {{ form.csrf_token }}
     </form>
 </body>
 </html>
@@ -157,6 +158,7 @@ function addForm() {
     $newForm.attr('id', 'subform-' + newIndex); // Assign a unique ID to the new form
     $newForm.addClass('subform'); // Add the 'subform' class to the new form
     $newForm.data('index', newIndex);
+    $newForm.find('input[name="questionType"]').val(questionType); // Set questionType value
 
     $newForm.find('label, input, select, textarea').each(function(idx) {
         var $item = $(this);
@@ -239,12 +241,14 @@ function adjustIndices(removedIndex) {
     });
 }
 
-
-
-
 $(document).ready(function() {
     $('#add').click(addForm); // Bind addForm function to click event of Add button
     $('.remove').click(removeForm);
+    $('#quiz').submit(function(event) {
+        // Remove the "questionType" field from the form data
+        $(this).find('input[name="questionType"]').remove();
+        return true; // Allow form submission to proceed
+    });
 });
 </script>
 
