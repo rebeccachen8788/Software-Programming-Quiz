@@ -2,7 +2,8 @@
 # accessed 2/2/24
 
 from flask import Flask, render_template, redirect, url_for, request
-from .db_connector import get_db_connection
+from .db_connector import get_db_connection, execute_query
+from .results import show_results, get_responses_for_taker_quiz_by_link_id
 
 def create_app(test_config=None):
     # create and configure the app
