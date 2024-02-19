@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Taker Responses for Attempt {{ link_id }}</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .correct { background-color: #ddffdd; }
+        .incorrect { background-color: #ffdddd; }
+    </style>
+</head>
+<body>
+    <h1>Responses for Attempt ID: {{ link_id }} by {{ taker_email }}</h1>
+    <table>
+        <tr>
+            <th>Question</th>
+            <th>Your Response</th>
+            <th>Correct?</th>
+        </tr>
+        {% for response in responses %}
+        <tr class="{{ 'correct' if response.correct else 'incorrect' }}">
+            <td>{{ response.question_details }}</td>
+            <td>{{ response.response }}</td>
+            <td>{{ 'Yes' if response.correct else 'No' }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <a href="{{ url_for('results') }}"><button>Back to Results</button></a>
+</body>
+</html>

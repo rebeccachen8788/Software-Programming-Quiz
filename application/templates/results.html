@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz Results - Sorted</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+    <script>
+        function redirectToTakerResponse(url) {
+            if (url) {
+                window.location.href = url;
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Quiz Results - Sorted by Score</h1>
+    {% for quizID, results in grouped_results.items() %}
+        <h2>Quiz ID: {{ quizID }}</h2>
+        <select onchange="redirectToTakerResponse(this.value);">
+            <option value="">Select Test Taker</option>
+            {% for takerID, takerEmail, linkID, totalScore in dropdown_data[quizID] %}
+                <option value="{{ url_for('show_taker_responses', link_id=linkID) }}">
+                    {{ takerEmail }} - Attempt: {{ linkID }} - Score: {{ totalScore }}
+                </option>
+            {% endfor %}
+        </select>
+        <table>
+            <tr>
+                <th>Taker ID</th>
+                <th>Taker Email</th>
+                <th>Time Taken</th>
+                <th>Total Score</th>
+                <th>Completed</th>
+            </tr>
+            {% for result in results %}
+            <tr>
+                <td>{{ result.takerID }}</td>
+                <td>{{ result.takerEmail }}</td>
+                <td>{{ result.timeTaken }}</td>
+                <td>{{ result.totalScore }}</td>
+                <td>{{ 'Yes' if result.completed else 'No' }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% endfor %}
+</body>
+</html>

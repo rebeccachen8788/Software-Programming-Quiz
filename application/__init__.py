@@ -29,5 +29,43 @@ def create_app(test_config=None):
     # @login_required -> prevents unauthenticated users from accessing this page
     def root():
         return render_template("homepage.html")
+    
+    app.route('/results')
+    def results():
+        return show_results()
+    
+    @app.route('/responses/<int:link_id>')
+    def show_taker_responses(link_id):
+        # Use link_id to fetch the responses for the specific quiz attempt
+        responses = get_responses_for_taker_quiz_by_link_id(link_id)
+        db = get_db_connection()
+        cursor = db.cursor(dictionary=True)
+        # Assume you have a function or logic here to fetch responses based on link_id
+        try:
+            # Fetching taker's email using link_id
+            cursor.execute("""
+                SELECT QT.takerEmail
+                FROM Results R
+                JOIN Quiz_Taker QT ON R.takerID = QT.takerID
+                WHERE R.linkID = %s;
+            """, (link_id,))
+            result = cursor.fetchone()
+            if result:
+                taker_email = result['takerEmail']
+            else:
+                taker_email = 'Unknown'
+            
+            # Fetch responses for the link_id (Assuming this part is done in get_responses_for_taker_quiz_by_link_id function)
+            responses = get_responses_for_taker_quiz_by_link_id(link_id)
+
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            taker_email = 'Error fetching email'
+            responses = []
+
+        finally:
+            cursor.close()
+            db.close()
+        return render_template('taker_responses.html', responses=responses, link_id=link_id, taker_email=taker_email)
 
     return app
