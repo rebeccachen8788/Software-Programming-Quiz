@@ -1,9 +1,11 @@
 import flask_login
 from flask import Flask, redirect, render_template, request, session, url_for
 from .db_connector import get_db_connection, execute_query
+from flask import Blueprint, render_template, request
 from itertools import groupby
 from operator import itemgetter
 
+bp = Blueprint('results', __name__, url_prefix='/')
 def get_quiz_results_for_creator(creator_id):
     """
     Fetches all quiz results for quizzes created by the specified creatorID.
@@ -37,6 +39,7 @@ def get_quiz_results_for_creator(creator_id):
         db.close()
     return sorted_results
 
+@bp.route('/results')
 def show_results():
     """
     Renders a template with the results for quizzes belonging to the logged-in creator.
@@ -61,6 +64,40 @@ def show_results():
         # Populate dropdown data with takerIDs and their email for each quiz
         dropdown_data[key] = [(result['takerID'], result['takerEmail'], result['linkID'], result['totalScore']) for result in results_list]
     return render_template('results.html', grouped_results=grouped_results, dropdown_data=dropdown_data)
+
+@bp.route('/responses/<int:link_id>')
+def show_taker_responses(link_id):
+        # Use link_id to fetch the responses for the specific quiz attempt
+        responses = get_responses_for_taker_quiz_by_link_id(link_id)
+        db = get_db_connection()
+        cursor = db.cursor(dictionary=True)
+        # Assume you have a function or logic here to fetch responses based on link_id
+        try:
+            # Fetching taker's email using link_id
+            cursor.execute("""
+                SELECT QT.takerEmail
+                FROM Results R
+                JOIN Quiz_Taker QT ON R.takerID = QT.takerID
+                WHERE R.linkID = %s;
+            """, (link_id,))
+            result = cursor.fetchone()
+            if result:
+                taker_email = result['takerEmail']
+            else:
+                taker_email = 'Unknown'
+            
+            # Fetch responses for the link_id (Assuming this part is done in get_responses_for_taker_quiz_by_link_id function)
+            responses = get_responses_for_taker_quiz_by_link_id(link_id)
+
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            taker_email = 'Error fetching email'
+            responses = []
+
+        finally:
+            cursor.close()
+            db.close()
+        return render_template('taker_responses.html', responses=responses, link_id=link_id, taker_email=taker_email)
 
 def get_responses_for_taker_quiz_by_link_id(link_id):
     query = """

@@ -31,7 +31,7 @@
         <select onchange="redirectToTakerResponse(this.value);">
             <option value="">Select Test Taker</option>
             {% for takerID, takerEmail, linkID, totalScore in dropdown_data[quizID] %}
-                <option value="{{ url_for('show_taker_responses', link_id=linkID) }}">
+            <option value="{{ url_for('results.show_taker_responses', link_id=linkID) }}">
                     {{ takerEmail }} - Attempt: {{ linkID }} - Score: {{ totalScore }}
                 </option>
             {% endfor %}
