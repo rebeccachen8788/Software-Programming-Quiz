@@ -125,8 +125,7 @@ def quiz_send():
     #     return "Emails sent successfully!"  # Can redirect or render another template here
     
     else:
-        return "Method Not Allowed", 405
-        # return render_template('quiz_send.html')
+        return render_template('quiz_send.html')
 
 # Route to send quiz results
 @bp.route('/send_quiz_results', methods=['POST'])
