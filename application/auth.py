@@ -1,46 +1,46 @@
 # Source: https://flask.palletsprojects.com/en/2.3.x/tutorial/views/
 # Accessed 2/2/24
 
-import flask_login
 from flask import Blueprint, flash, g, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 import functools
 from .db_connector import get_db_connection, execute_query
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField, EmailField
+from wtforms.validators import InputRequired, Email, EqualTo, Length
 
 bp = Blueprint('auth', __name__, url_prefix='/')
 
-
-
+class LoginForm(FlaskForm):
+    email = EmailField('Email', validators=[InputRequired(), Email(message="Please enter a valid email address")])
+    password = PasswordField('Password', validators=[InputRequired()])
+    submit = SubmitField('Login')
+    
+class SignupForm(FlaskForm):
+    email = EmailField('Email', validators=[InputRequired(), Email(message="Please enter a valid email address")])
+    password = PasswordField('Password', validators=[InputRequired(), Length(min=8, max=50, message=f"Password must be 8-50 characters long")])
+    password2 = PasswordField('Confirm password', validators=[InputRequired(), EqualTo('password', message="Passwords must match")])
+    firstName = StringField('First Name', validators=[InputRequired()])
+    lastName = StringField('Last Name', validators=[InputRequired()])
+    submit = SubmitField('Sign Up')
+    
 # User sign up
 @bp.route('/signup', methods=['GET', 'POST'])
 def signup():   
     
     if request.method == 'POST':
         email = request.form['email']
-        password1 = request.form['password1']
-        password2 = request.form['password2']
+        password = request.form['password']
         fn = request.form['firstName']
         ln = request.form['lastName']
         error = None
         
-        # form validation
-        if not email:
-            error = 'Signup Error: Email is required.'
-        elif not password1:
-            error = 'Signup Error: Password is required.'
-        elif password1 != password2:
-            error = 'Signup Error: Passwords do not match.'
-        elif len(password1) < 8:
-            error = "Signup Error: Password must be at least 8 characters long."
-            print(error)
-        # WIP -> elif other password requirements
-        else:
-            query = "INSERT INTO Quiz_Creator (creatorEmail, password, firstName, lastName) VALUES (%s, %s, %s, %s);"
+        query = "INSERT INTO Quiz_Creator (creatorEmail, password, firstName, lastName) VALUES (%s, %s, %s, %s);"
         
         # attempt to insert the new user into the database
         if not error: 
             try:
-                secure_password = generate_password_hash(password1) 
+                secure_password = generate_password_hash(password) 
                 db = get_db_connection()
                 user = execute_query(db, query, (email, secure_password, fn, ln)) 
             except not user:
@@ -52,7 +52,7 @@ def signup():
             finally:
                 db.close()
         flash(error)
-    return render_template('/login-signup.html')
+    return render_template('/login-signup.html', loginForm=LoginForm(), signupForm=SignupForm())
         
 # User login
 @bp.route('/login', methods=['GET', 'POST'])
@@ -80,7 +80,7 @@ def login():
         else: 
             error = "Email not found."
         flash(error)      
-    return render_template('/login-signup.html')
+    return render_template('/login-signup.html', loginForm=LoginForm(), signupForm=SignupForm())
 
 # logout
 @bp.route('/logout')
