@@ -17,33 +17,26 @@
     <div class="top-content">
         <div class="inner-bg">
             <div class="container">
+              {% for message in get_flashed_messages() %}
+                  {% if message %}
+                      <div class="flash">{{ message }}</div>
+                  {% endif %}                            
+              {% endfor %}
                 <div class="row">
+                    <br/>
                     <div class="col-sm-5">
                         <!-- Login Form -->
                         <form id="login-form" method="POST" action="{{ url_for('auth.login') }}">
                             <h3>Log In</h3>
                               <div class="form-group">
-                                {% if loginForm.email.errors %}
-                                  <ul class="errors">
-                                  {% for error in loginForm.email.errors %}
-                                      <li>{{ error }}</li>
-                                  {% endfor %}
-                                  </ul>
-                                {% endif %}
                                 {{ loginForm.csrf_token }}
-                                {{ loginForm.email.label }} {{ loginForm.email(size=20) }}
-                                <br />
-                                {% if loginForm.password.errors %}
-                                  <ul class="errors">
-                                  {% for error in loginForm.password.errors %}
-                                      <li>{{ error }}</li>
-                                  {% endfor %}
-                                  </ul>
-                                {% endif %}
-                                {{ loginForm.hidden_tag() }}
-                                {{ loginForm.password.label }} {{ loginForm.password(size=20)}} 
-                                <br />
-                                {{ loginForm.submit() }}
+                                {{ loginForm.email.label }}  
+                                  {{ loginForm.email(class="form-control form-control-md", placeholder="Email")}}
+                              <br />
+                              {{ loginForm.password.label }} 
+                                  {{ loginForm.password(class="form-control form-control-md", placeholder="Password")}}
+                              <br />
+                              {{ loginForm.submit() }}
                                 <br />
                           </form>
                         </div> 
@@ -55,25 +48,41 @@
                         <form id="signup-form" method="POST" action="{{ url_for('auth.signup') }}">
                             <h3 align="center">Sign Up</h3>
                             <div class="form-group">
-                              {{ signupForm.csrf_token }}
-                              {{ signupForm.email.label }} {{ signupForm.email(size=20) }}
+                              <div class="form-group">
+                                {{ signupForm.csrf_token }}
+                                {{ signupForm.email.label }}   
+                                {% if signupForm.email.errors %}
+                                {{ signupForm.email(class="form-control form-control-lg is-invalid")}}
+                                <div class="invalid-feedback">
+                                  {% for error in signupForm.email.errors %}
+                                    <span>{{ error }}</span>
+                                  {% endfor %}
+                                </div>
+                                {% else %}
+                                  {{ signupForm.email(class="form-control form-control-md", placeholder="Email")}}
+                                {% endif %}
                               <br />
-                              {{ signupForm.firstName.label }} {{ signupForm.firstName(size=20) }}
+                              {{ signupForm.firstName.label }} {{ signupForm.firstName(class="form-control form-control-md", placeholder="First Name") }}
                               <br />
-                              {{ signupForm.lastName.label }} {{ signupForm.lastName(size=20) }}
+                              {{ signupForm.lastName.label }} {{ signupForm.lastName(class="form-control form-control-md", placeholder="Last Name") }}
                               <br />
-                              {{ signupForm.hidden_tag() }}
-                              {{ signupForm.password.label }} {{ signupForm.password(size=20)}} 
-                              <br />
-                              {{ signupForm.password2.label }} {{ signupForm.password2(size=20)}}
+                              {{ signupForm.password.label }} 
+                              {% if signupForm.password.errors %}
+                                {{ signupForm.password(class="form-control form-control-lg is-invalid", placeholder="Password")}}
+                                {{ signupForm.password2.label }} {{ signupForm.password2(class="form-control form-control-md", placeholder="Confirm Password")}}
+                                <div class="invalid-feedback">
+                                  {% for error in signupForm.password.errors %}
+                                    <span>{{ error }}</span>
+                                  {% endfor %}
+                                </div>
+                                {% else %}
+                                  {{ signupForm.password(class="form-control form-control-md", placeholder="Password")}}
+                                  {{ signupForm.password2.label }} {{ signupForm.password2(class="form-control form-control-md", placeholder="Confirm Password")}}
+                                {% endif %}
                               <br />
                               {{ signupForm.submit() }}
                               <br />
-                            {% for message in get_flashed_messages() %}
-                                {% if message.startswith("Signup") %}
-                                    <div class="flash">{{ message }}</div>
-                                {% endif %}                            
-                            {% endfor %}
+                              
                     </div>
                 </div>
             </div>

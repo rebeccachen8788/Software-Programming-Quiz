@@ -8,21 +8,20 @@ from .db_connector import get_db_connection, execute_query
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, EmailField
 from wtforms.validators import InputRequired, Email, EqualTo, Length
-from wtforms.widgets import EmailInput
 
 bp = Blueprint('auth', __name__, url_prefix='/')
 
 class LoginForm(FlaskForm):
-    email = EmailField('Email', widget=EmailInput())
-    password = PasswordField('Password', validators=[InputRequired()])
+    email = EmailField('Email', [InputRequired(), Email(message="Please enter a valid email address")])
+    password = PasswordField('Password', [InputRequired()])
     submit = SubmitField('Login')
     
 class SignupForm(FlaskForm):
-    email = EmailField('Email', validators=[InputRequired(), Email(message="Please enter a valid email address")])
-    password = PasswordField('Password', validators=[InputRequired(), Length(min=8, max=50, message=f"Password must be 8-50 characters long")])
-    password2 = PasswordField('Confirm password', validators=[InputRequired(), EqualTo('password', message="Passwords must match")])
-    firstName = StringField('First Name', validators=[InputRequired()])
-    lastName = StringField('Last Name', validators=[InputRequired()])
+    email = EmailField('Email', [InputRequired(), Email(message="Please enter a valid email address")])
+    password = PasswordField('Password', [InputRequired(), Length(min=8, max=50, message="Password must be 8-50 characters long"), EqualTo('password2', message="Passwords must match")])
+    password2 = PasswordField('Confirm password', [InputRequired()])
+    firstName = StringField('First Name', [InputRequired()])
+    lastName = StringField('Last Name', [InputRequired()])
     submit = SubmitField('Sign Up')
     
 # User sign up
@@ -36,25 +35,26 @@ def signup():
         password = signupForm.password.data
         fn = signupForm.firstName.data
         ln = signupForm.lastName.data
-        error = None
-        
+        flashMessage = None
         query = "INSERT INTO Quiz_Creator (creatorEmail, password, firstName, lastName) VALUES (%s, %s, %s, %s);"
         
         # attempt to insert the new user into the database
-        if not error: 
-            try:
-                secure_password = generate_password_hash(password) 
-                db = get_db_connection()
-                user = execute_query(db, query, (email, secure_password, fn, ln)) 
-            except not user:
-                error = "Signup Error: An account with this email already exists."
+        try:
+            secure_password = generate_password_hash(password) 
+            db = get_db_connection()
+            cursor = db.cursor()
+            cursor.execute(query, (email, secure_password, fn, ln))
+            user = cursor.fetchone()
+        except Exception as e:
+            if 'Duplicate entry' in str(e):
+                flashMessage = "Email already in use. Please log in or use a different email address."
             else:
-                info = "Signup Successful: Please log in to your account."
-                flash(info)
-                return redirect(url_for('root'))
-            finally:
-                db.close()
-        flash(error)
+                flashMessage = e
+        else:
+            flashMessage = "Signup Successful: Please log in to your account."
+        finally:
+            db.close()
+            flash(flashMessage)
     return render_template('/login-signup.html', loginForm=loginForm, signupForm=signupForm)
         
 # User login
@@ -65,26 +65,28 @@ def login():
     if loginForm.validate_on_submit():
         email = loginForm.email.data
         password = loginForm.password.data
-        error = None
-        
-        query = "SELECT creatorID, password FROM Quiz_Creator WHERE creatorEmail = %s;"
-        db = get_db_connection()
-        cursor = db.cursor(dictionary=True)
-        cursor.execute(query, (email,)) 
-        # validate username and password combo
-        user = cursor.fetchone()
-        cursor.close()
-        db.close()
-        if user:
-            if check_password_hash(user['password'], password):
+        flashMessage = None
+        try: 
+            query = "SELECT creatorID, password FROM Quiz_Creator WHERE creatorEmail = %s;"
+            db = get_db_connection()
+            cursor = db.cursor(dictionary=True)
+            cursor.execute(query, (email,)) 
+            # validate username and password combo
+            user = cursor.fetchone()
+            cursor.close()
+            db.close()
+        except Exception as e:
+            flashMessage = e
+        else:
+            if not user:
+                flashMessage = "Email not found. Please sign up for an account."
+            elif check_password_hash(user['password'], password):
                 session.clear()
                 session['user_id'] = user['creatorID']
                 return redirect(url_for('root'))
             else:
-                error = "Incorrect password."
-        else: 
-            error = "Email not found."
-        flash(error)      
+                flashMessage = "Incorrect password. Please try again."
+        flash(flashMessage, "\n")      
     return render_template('/login-signup.html', loginForm=loginForm, signupForm=signupForm)
 
 # logout
