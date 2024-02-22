@@ -23,9 +23,23 @@
                         <form id="login-form" method="POST" action="{{ url_for('auth.login') }}">
                             <h3>Log In</h3>
                               <div class="form-group">
+                                {% if loginForm.email.errors %}
+                                  <ul class="errors">
+                                  {% for error in loginForm.email.errors %}
+                                      <li>{{ error }}</li>
+                                  {% endfor %}
+                                  </ul>
+                                {% endif %}
                                 {{ loginForm.csrf_token }}
                                 {{ loginForm.email.label }} {{ loginForm.email(size=20) }}
                                 <br />
+                                {% if loginForm.password.errors %}
+                                  <ul class="errors">
+                                  {% for error in loginForm.password.errors %}
+                                      <li>{{ error }}</li>
+                                  {% endfor %}
+                                  </ul>
+                                {% endif %}
                                 {{ loginForm.hidden_tag() }}
                                 {{ loginForm.password.label }} {{ loginForm.password(size=20)}} 
                                 <br />

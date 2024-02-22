@@ -16,7 +16,7 @@
 {% endblock %}
 {% block content %}
     <h1>Create a Quiz</h1>
-    <!-- True/False template-->
+    <!-- true-false template-->
     <div class="template-form" id="template-true-false" style="display: none" questionType=>
         <label for="questionText" class="form-label">Question Text:</label>
         <input type="text" name="questionText" class="form-control" id="questionText" required>
@@ -121,6 +121,9 @@
         </select>
         <button type="button" id="add">Add</button>
     <!-- submit quiz button -->
+    <br />
+    {{form.timer.label}} {{ form.timer }} {{ form.timer.description }}
+    <br />
     <button type="submit" id="submit" class="btn btn-primary">Submit Quiz</button>
     {{ form.csrf_token }}
     </form>

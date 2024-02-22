@@ -8,11 +8,12 @@ from .db_connector import get_db_connection, execute_query
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, EmailField
 from wtforms.validators import InputRequired, Email, EqualTo, Length
+from wtforms.widgets import EmailInput
 
 bp = Blueprint('auth', __name__, url_prefix='/')
 
 class LoginForm(FlaskForm):
-    email = EmailField('Email', validators=[InputRequired(), Email(message="Please enter a valid email address")])
+    email = EmailField('Email', widget=EmailInput())
     password = PasswordField('Password', validators=[InputRequired()])
     submit = SubmitField('Login')
     
@@ -26,13 +27,15 @@ class SignupForm(FlaskForm):
     
 # User sign up
 @bp.route('/signup', methods=['GET', 'POST'])
-def signup():   
+def signup():
+    signupForm = SignupForm()
+    loginForm = LoginForm()
     
-    if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        fn = request.form['firstName']
-        ln = request.form['lastName']
+    if signupForm.validate_on_submit():
+        email = signupForm.email.data
+        password = signupForm.password.data
+        fn = signupForm.firstName.data
+        ln = signupForm.lastName.data
         error = None
         
         query = "INSERT INTO Quiz_Creator (creatorEmail, password, firstName, lastName) VALUES (%s, %s, %s, %s);"
@@ -52,14 +55,16 @@ def signup():
             finally:
                 db.close()
         flash(error)
-    return render_template('/login-signup.html', loginForm=LoginForm(), signupForm=SignupForm())
+    return render_template('/login-signup.html', loginForm=loginForm, signupForm=signupForm)
         
 # User login
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
+    signupForm = SignupForm()
+    loginForm = LoginForm()
+    if loginForm.validate_on_submit():
+        email = loginForm.email.data
+        password = loginForm.password.data
         error = None
         
         query = "SELECT creatorID, password FROM Quiz_Creator WHERE creatorEmail = %s;"
@@ -80,7 +85,7 @@ def login():
         else: 
             error = "Email not found."
         flash(error)      
-    return render_template('/login-signup.html', loginForm=LoginForm(), signupForm=SignupForm())
+    return render_template('/login-signup.html', loginForm=loginForm, signupForm=signupForm)
 
 # logout
 @bp.route('/logout')
