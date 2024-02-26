@@ -16,3 +16,4 @@ requests==2.31.0
 urllib3==2.2.1
 Werkzeug==3.0.1
 WTForms==3.1.2
+mailjet-rest==3.1
