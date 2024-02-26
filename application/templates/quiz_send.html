@@ -29,6 +29,19 @@
                         as well as an attached link to the quiz.</p>
                     <textarea class="form-control" name="message[]" required></textarea>
                 </div>
+                <div class="form-group">
+                    <label for="quiz_id">Select Quiz</label>
+                    <select class="form-control" name="quiz_id" required>
+                        {% if quizzes %}
+                            {% for quiz in quizzes %}
+                                <option value="{{ quiz.quizID }}">{{ quiz.quizTitle }}</option>
+                            {% endfor %}
+                        {% else %}
+                            <option value="" disabled>No quizzes available</option>
+                        {% endif %}
+                    </select>
+                </div>
+                
             </div>
             <button type="button" class="btn btn-primary" onclick="addInputFields()">Add Another</button>
             <button type="submit" class="btn btn-primary">Send Invitation</button>

@@ -1,6 +1,6 @@
 # SOURCE: https://github.com/mailjet/mailjet-apiv3-python?tab=readme-ov-file#simple-post-request
 
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, session, url_for
 from mailjet_rest import Client
 from .db_connector import get_db_connection, execute_query
 
@@ -124,6 +124,33 @@ def get_creator_id_from_quiz_id(quiz_id):
     return None
 
 
+def fetch_user_quizzes(user_id):
+    # Assume you have a function to get a database connection
+    db_connection = get_db_connection()
+
+    if db_connection:
+        try:
+            # Execute a query to fetch quizzes for the given user ID
+            query = "SELECT quizID, title FROM Quiz WHERE creatorID = %s"
+            cursor = db_connection.cursor()
+            cursor.execute(query, (user_id,))
+            
+            # Fetch all rows as a list of dictionaries
+            quizzes = [{'quiz_id': row[0], 'title': row[1]} for row in cursor.fetchall()]
+            
+            # Close cursor and database connection
+            cursor.close()
+            db_connection.close()
+            
+            return quizzes
+        except Exception as e:
+            print(f"Error fetching user quizzes: {e}")
+            return []  # Return an empty list if there's an error
+    else:
+        print("Error: Unable to connect to the database.")
+        return []  # Return an empty list if there's no database connection
+
+
 @bp.route('/quiz_send', methods=['GET', 'POST'])
 def quiz_send():
     if request.method == 'POST':
@@ -147,11 +174,18 @@ def quiz_send():
             # Handle error if linkID insertion fails
             return "Failed to generate quiz link. Please try again.", 500
     else:
-        return render_template('quiz_send.html')
+        # Fetch quizzes created by the current user
+        user_id = session.get('user_id')  # Assuming user ID is stored in session
+        if user_id:
+            user_quizzes = fetch_user_quizzes(user_id)  # Implement this function according to your database structure
+        else:
+            user_quizzes = []
+        
+        return render_template('quiz_send.html', quizzes=user_quizzes)
 
 
 # Route to send quiz results
-# The following was inpsired by the code from result.py on function show_taker_responses
+# The following was grabbed and modified by the code from result.py on function show_taker_responses
 @bp.route('/send_quiz_results', methods=['POST'])
 def send_quiz_results():
     if request.method == 'POST':
@@ -168,21 +202,15 @@ def send_quiz_results():
         if not quiz_creator_email:
             return "Failed to send quiz results email. Quiz creator not found.", 404
 
-        # Retrieve the quiz taker's email and responses
-        taker_email, responses = get_taker_email_and_responses(link_id)
-
-        # Render the HTML page with the data
-        rendered_html = render_template('taker_responses.html', link_id=link_id, taker_email=taker_email, responses=responses)
-
         # Send quiz results email
         try:
-            # Include the rendered HTML in the email body
-            send_email(names=[quiz_creator_email], email_addresses=[quiz_creator_email], messages=[""], link_ids=[link_id])
+            # Send email with the link to view quiz results
+            send_quiz_results_email(quiz_creator_email, quiz_title, link_id)
             return "Quiz results email sent to the creator!"
         except Exception as e:
             return f"Failed to send quiz results email: {str(e)}", 500
     else:
-        return "Method Not Allowed", 405    
+        return "Method Not Allowed", 405
 
 
 def get_responses_for_taker_quiz_by_link_id(link_id):
@@ -239,14 +267,17 @@ def get_taker_email_and_responses(link_id):
     return taker_email, responses
 
 
-def send_quiz_results_email(quiz_creator_email, quiz_title, quiz_results):
+def send_quiz_results_email(quiz_creator_email, quiz_title, link_id):
+    # Generate URL for viewing quiz results
+    results_url = url_for('taker_reponses', link_id=link_id, _external=True)
+    
     # Define the email message
     email_data = {
         'Messages': [
             {
                 'From': {
-                    'Email': 'your_email@example.com',
-                    'Name': 'Your Name'
+                    'Email': 'virgenlg@oregonstate.edu',
+                    'Name': 'Software Programming Quiz'
                 },
                 'To': [
                     {
@@ -255,7 +286,8 @@ def send_quiz_results_email(quiz_creator_email, quiz_title, quiz_results):
                     }
                 ],
                 'Subject': f'Results for "{quiz_title}" Quiz',
-                'TextPart': f'Hello,\n\nHere are the results for the "{quiz_title}" Quiz:\n\n{quiz_results}'
+                'TextPart': f'Hello,\n\nHere are the results for the "{quiz_title}" Quiz.\n\n'
+                            f'You can view the results by clicking on the following link:\n{results_url}'
             }
         ]
     }
