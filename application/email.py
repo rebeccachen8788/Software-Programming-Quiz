@@ -107,13 +107,13 @@ def get_quiz_creator_email(quiz_id):
     return None
 
 
-@bp.route('/quiz_send', methods=['POST'])
+@bp.route('/quiz_send', methods=['GET', 'POST'])
 def quiz_send():
     if request.method == 'POST':
         names = request.form.getlist('name[]')
         emails = request.form.getlist('email[]')
         messages = request.form.getlist('message[]')
-        quiz_id = request.form['quiz_id']  # Assuming you get the quiz ID from the form
+        quiz_id = request.form['quiz_id']  # Assuming we get the quiz ID from the form
         link_ids = []
         # Insert a new linkID for each recipient and store it in the link_ids list
         for email in emails:
