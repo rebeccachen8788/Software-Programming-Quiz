@@ -44,7 +44,6 @@ def show_results():
     Renders a template with the results for quizzes belonging to the logged-in creator.
     """
     if 'user_id' not in session:
-        # Assuming there's a login view to redirect to if not logged in
         return redirect(url_for('auth.login'))
 
     # Fetch sorted results as before
@@ -70,7 +69,6 @@ def show_taker_responses(link_id):
         responses = get_responses_for_taker_quiz_by_link_id(link_id)
         db = get_db_connection()
         cursor = db.cursor(dictionary=True)
-        # Assume you have a function or logic here to fetch responses based on link_id
         try:
             # Fetching taker's email using link_id
             cursor.execute("""
@@ -85,7 +83,7 @@ def show_taker_responses(link_id):
             else:
                 taker_email = 'Unknown'
             
-            # Fetch responses for the link_id (Assuming this part is done in get_responses_for_taker_quiz_by_link_id function)
+            # Fetch responses for the link_id 
             responses = get_responses_for_taker_quiz_by_link_id(link_id)
 
         except Exception as e:
