@@ -106,6 +106,24 @@ def get_quiz_creator_email(quiz_id):
     return None
 
 
+def get_creator_id_from_quiz_id(quiz_id):
+    """Retrieve the creator ID associated with the provided quiz ID."""
+    query = """
+        SELECT creatorID
+        FROM Quiz
+        WHERE quizID = %s
+    """
+    db_connection = get_db_connection()
+    if db_connection:
+        cursor = execute_query(db_connection, query, (quiz_id,))
+        if cursor:
+            result = cursor.fetchone()
+            db_connection.close()
+            if result:
+                return result['creatorID']
+    return None
+
+
 @bp.route('/quiz_send', methods=['GET', 'POST'])
 def quiz_send():
     if request.method == 'POST':
@@ -114,8 +132,13 @@ def quiz_send():
         message = request.form.get('message')  # Assuming single message field
         quiz_id = request.form['quiz_id']  # Assuming we get the quiz ID from the form
         
+        # Fetch the creator ID from the database using the quiz ID
+        creator_id = get_creator_id_from_quiz_id(quiz_id)
+        if not creator_id:
+            return "Quiz not found or expired.", 404
+        
         # Insert a new linkID for the recipient
-        link_id = insert_new_link_id(quiz_id, email)
+        link_id = insert_new_link_id(quiz_id, email, creator_id)
         if link_id:
             # Send email to the recipient
             send_email(name, email, message, link_id)
@@ -127,7 +150,6 @@ def quiz_send():
         return render_template('quiz_send.html')
 
 
-    
 # Route to send quiz results
 # The following was inpsired by the code from result.py on function show_taker_responses
 @bp.route('/send_quiz_results', methods=['POST'])
