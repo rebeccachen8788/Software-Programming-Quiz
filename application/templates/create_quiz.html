@@ -16,75 +16,92 @@
     <!-- true-false template-->
     
     <div class="template-form" id="template-true-false" style="display: none" questionType=>
-        <label for="questionType">True/False</label
-        <label for="questionText">Question:</label>
-        {% if questionForm.questionText.errors %}
-        {{ questionForm.questionText(class="form-control form-control-md is-invalid") }}
-        <div class="invalid-feedback">
-            {% for error in questionForm.questionText.errors %}
-              <span>{{ error }}</span>
-            {% endfor %}
-        </div>
-        {% else %}
-        {{ questionForm.questionText.label }} {{ questionForm.questionText(class="form-control form-control-md") }}
-        {% endif %}
-        {{ questionForm.correctTrueFalse }} 
+        <label for="questionText" class="form-label">Question Text:</label>
+        <input type="text" name="questionText" class="form-control" id="questionText" required>
+        <fieldset>
+            <legend>Answer Choices:</legend>
+            <div>
+                <input type="radio" id="true" name="correctRadio" value="True" unchecked required>
+                <label for="true">True</label>
+            </div>
+            <div>
+                <input type="radio" id="false" name="correctRadio" value="False" unchecked required>
+                <label for="false">False</label>
+            </div>
+        </fieldset>
+        <br />
         <input type="hidden" name="questionType" value="true-false">
-    </div>
-    {% if questionForm.questionText.errors %}
-        {{ questionForm.questionText.description }} {{ questionForm.questionText(class="form-control form-control-md is-invalid") }}
-        <div class="invalid-feedback">
-            {% for error in questionForm.questionText.errors %}
-              <span>{{ error }}</span>
-            {% endfor %}
-        </div>
-    {% else %}
-        {{ questionForm.questionText.label }} {{ questionForm.questionText(class="form-control form-control-md") }}
-    {% endif %}
-    {{ questionForm.correctMultipleChoice }} {{ questionForm.answer }} {{ questionForm.answer }} {{ questionForm.answer }} {{ questionForm.answer }}
 
-    <!--Multiple Choice template-->
+    </div>
+
+    <!-- Multiple Choice template-->
     <div class="template-form" id="template-multiple-choice" style="display: none">
-        
+        <label for="questionText">Question Text:</label>
+        <input type="text" name="questionText" required>
+
+        <legend>Answer Choices:</legend>
+        <div class="mb-3">
+            <input type="radio" id="correctAnswer1" name="correctRadio" value="answer1" required>
+            <label for="correctAnswer1" class="form-label">Answer 1</label>
+            <input type="text" class="form-control" id="textAnswer1" name="answer1" placeholder="Type answer option here" required>
+        </div>
+        <div class="mb-3">
+            <input type="radio" id="correctAnswer2" name="correctRadio" value="answer2" required>
+            <label for="correctAnswer2" class="form-label">Answer 2</label>
+            <input type="text" class="form-control" id="textAnswer2" name="answer2" placeholder="Type answer option here" required>
+        </div>
+        <div class="mb-3">
+            <input type="radio" id="correctAnswer3" name="correctRadio" value="answer3" required>
+            <label for="correctAnswer3" class="form-label">Answer 3</label>
+            <input type="text" class="form-control" id="textAnswer3" name="answer3" placeholder="Type answer option here" required>
+        </div>
+        <div class="mb-3">
+            <input type="radio" id="correctAnswer4" name="correctRadio" value="answer4" required>
+            <label for="correctAnswer4" class="form-label">Answer 4</label>
+            <input type="text" class="form-control" id="textAnswer4" name="answer4" placeholder="Type answer option here" required>
+        </div>
+        <br />
+        <input type="hidden" name="questionType" value="multiple-choice">
+    </select>
     </div>
 
-    <!---Check All template
+    <!-- Check All template-->
     <div class="template-form" id="template-check-all" style="display: none">
         <label for="questionText">Question Text:</label>
         <input type="text" name="questionText" id="mquestionText" required>
     
         <legend>Answer Choices:</legend>
         <div class="mb-3">
-            <input type="checkbox" id="mcorrectAnswer1" name="correctCheckboxes" value="answer1">
+            <input type="checkbox" id="mcorrectAnswer1" name="correctCheckboxes1" value="answer1" class="check-all">
             <label for="correctAnswer1" class="form-label">Answer 1</label>
-            <input type="text" class="form-control" name="answer1" id="mtextAnswer1" placeholder="Type answer option here">
+            <input type="text" class="form-control" name="answer1" id="mtextAnswer1" placeholder="Type answer option here" required>
         </div>
         <div class="mb-3">
-            <input type="checkbox" id="mcorrectAnswer2" name="correctCheckboxes" value="answer2">
+            <input type="checkbox" id="mcorrectAnswer2" name="correctCheckboxes2" value="answer2" class="check-all">
             <label for="correctAnswer2" class="form-label">Answer 2</label>
-            <input type="text" class="form-control" name="answer2" id="mtextAnswer2" placeholder="Type answer option here">
+            <input type="text" class="form-control" name="answer2" id="mtextAnswer2" placeholder="Type answer option here" required>
         </div>
         <div class="mb-3">
-            <input type="checkbox" id="mcorrectAnswer3" name="correctCheckboxes" value="answer3">
+            <input type="checkbox" id="mcorrectAnswer3" name="correctCheckboxes3" value="answer3" class="check-all">
             <label for="correctAnswer3" class="form-label">Answer 3</label>
-            <input type="text" class="form-control" name="answer3" id="mtextAnswer3" placeholder="Type answer option here">
+            <input type="text" class="form-control" name="answer3" id="mtextAnswer3" placeholder="Type answer option here" required>
         </div>
         <div class="mb-3">
-            <input type="checkbox" id="mcorrectAnswer4" name="correctCheckboxes" value="answer4">
+            <input type="checkbox" id="mcorrectAnswer4" name="correctCheckboxes4" value="answer4" class="check-all">
             <label for="correctAnswer4" class="form-label">Answer 4</label>
-            <input type="text" class="form-control" name="answer4" id="mtextAnswer4" placeholder="Type answer option here">
-        </div>
+            <input type="text" class="form-control" name="answer4" id="mtextAnswer4" placeholder="Type answer option here" required>
+        </div>        
         <br />
         <input type="hidden" name="questionType" value="check-all">
     </div>    
 
-    Freeform template
+    <!-- Freeform template-->
     <div class="template-form" id="template-freeform" style="display: none">
         <label for="questionText">Question Text:</label>
             <input type="text" name="questionText" required>
         <br />
         <input type="hidden" name="questionType" value="freeform">
-    </div> -->
+    </div>
 
     <form id="quiz" method="POST" action="">
         <!-- Container to hold dynamically created subforms -->
@@ -103,7 +120,10 @@
         <button type="button" id="add">Add</button>
     <!-- submit quiz button -->
     <br />
-    {{form.timer.label}} {{ form.timer }} {{ form.timer.description }}
+    <div class="mb-3" required>
+       {{form.timer.label}} {{ form.timer }} {{ form.timer.description }}
+    </div>
+    
     <br />
     <button type="submit" id="submit" class="btn btn-primary">Submit Quiz</button>
     {{ form.csrf_token }}
@@ -167,8 +187,22 @@ function addForm() {
     $('#subforms-container').append($newForm);
     $newForm.addClass('subform');
     $newForm.removeClass('is-hidden');
-
     $newForm.find('.remove').click(removeForm);
+        // Re-bind the click event handler to checkboxes in the newly added form
+    $newForm.find('input[type="checkbox"]').click(function() {
+        // Toggle the checked attribute of the corresponding checkbox
+        var checkboxId = $(this).attr('id');
+        var labelFor = $('label[for="' + checkboxId + '"]');
+        var inputCheckbox = $(this);
+        
+        if (inputCheckbox.prop('checked')) {
+            inputCheckbox.attr('checked', true);
+            labelFor.addClass('checked');
+        } else {
+            inputCheckbox.attr('checked', false);
+            labelFor.removeClass('checked');
+        }
+    });
 }
 
 
@@ -187,44 +221,75 @@ function removeForm() {
     adjustIndices(removedIndex);
 }
 
-// Function to adjust the indices of form fields when removing items - NOT TESTED
-function adjustIndices(removedIndex) {
-    var $forms = $('.subform');
+// validate checkbox selection before submission
+function validateForm() {
+    console.log('Validating form...');
+    var isValid = true;
 
-    $forms.each(function(i) {
-        var $form = $(this);
-        var index = parseInt($form.data('index'));
-        var newIndex = index - 1;
+    // Select all dynamically created forms
+    var dynamicForms = document.querySelectorAll('#subforms-container .subform');
 
-        if (index < removedIndex) {
-            // Skip
-            return true;
-        }
-
-        // Update IDs in form fields
-        $form.attr('id', 'subform-' + newIndex);
-        $form.data('index', newIndex);
-
-        $form.find('label, input, select, textarea').each(function(j) {
-            var $item = $(this);
-
-            if ($item.is('label')) {
-                // Update labels
-                $item.attr('for', 'subform-' + newIndex + '-' + $item.attr('for'));
-                return;
+    // Iterate over each form
+    dynamicForms.forEach(function(form) {
+        var checkboxes = form.querySelectorAll('input.check-all[type="checkbox"]');
+        var checkedCount = 0;
+        
+        // Iterate over each checkbox in the current form
+        checkboxes.forEach(function(checkbox) {
+            if (checkbox.checked) {
+                checkedCount++;
             }
-
-            // Update other fields
-            $item.attr('id', 'subform-' + newIndex + '-' + $item.attr('id'));
-            $item.attr('name', 'subform-' + newIndex + '-' + $item.attr('name'));
         });
+
+        console.log('Number of checkboxes found:', checkboxes.length);
+        console.log('Number of checkboxes checked:', checkedCount);
+        
+        if (checkboxes.length > 0 && checkedCount === 0) {
+            isValid = false;
+            return false; // Exit the loop early if one form is invalid
+        }
     });
+
+    if (!isValid) {
+        console.log('Form is invalid.');
+    } else {
+        console.log('Form is valid.');
+    }
+
+    return isValid;
 }
+
+
+// Function to handle checkbox click using event delegation
+$(document).on('click', 'input[type="checkbox"].check-all', function() {
+    var checkboxId = $(this).attr('id');
+    var labelFor = $('label[for="' + checkboxId + '"]');
+    
+    // Check if the checkbox is checked
+    if ($(this).is(':checked')) {
+        labelFor.addClass('checked');
+    } else {
+        labelFor.removeClass('checked');
+    }
+});
+
 
 $(document).ready(function() {
     $('#add').click(addForm); // Bind addForm function to click event of Add button
     $('.remove').click(removeForm); // Bind removeForm function to click event of Remove button NOT TESTED
+    // Intercept form submission
+    $('#quiz').submit(function(event) {
+        // Call the validation function before submitting the form
+        if (!validateForm()) {
+            // Prevent form submission if validation fails
+            event.preventDefault();
+            console.log('Form submission prevented due to validation errors.');
+        } else {
+            console.log('Form submitted successfully.');
+        }
+    });
 });
+
 </script>
 
 
