@@ -5,5 +5,5 @@ app = create_app()
 
 # Listener
 if __name__ == "__main__":
-    port = int(os.environ.get('PORT', 12118))
+    port = int(os.environ.get('PORT', 12119))
     app.run(port=port, debug=True)
