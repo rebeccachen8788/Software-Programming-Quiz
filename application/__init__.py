@@ -7,7 +7,7 @@ from .results import show_results, get_responses_for_taker_quiz_by_link_id
 
 def create_app(test_config=None):
     # create and configure the app
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask(__name__, instance_relative_config=True, template_folder='templates')
     app.config.from_mapping(
         SECRET_KEY='randomKey'
     )

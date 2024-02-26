@@ -2,8 +2,8 @@
 
 from flask import flash, Blueprint, render_template, redirect, session, url_for, request
 from flask_wtf import FlaskForm, Form
-from wtforms import BooleanField, FieldList, FormField, IntegerField, RadioField, StringField
-from wtforms import validators
+from wtforms import BooleanField, FieldList, FormField, IntegerField, RadioField, SelectField, StringField
+from wtforms.validators import InputRequired, Length, ValidationError
 from wtforms.widgets import NumberInput
 
 from .db_connector import get_db_connection
@@ -14,11 +14,12 @@ bp = Blueprint('create_quiz', __name__, url_prefix='/')
 
 class QuestionForm(Form):
     # subform - QuizForm contains a list of QuestionForms
-    questionText = StringField('questionText' , [validators.Length(min=1, max=500)], description="Question: ")
-    questionType = StringField('questionType')
-    correctCheckboxes = FieldList(BooleanField('correctCheckboxes')) # for check all questions
-    correctRadio = RadioField('correctRadio') # for true/false and multiple choice questions
-    answers = FieldList(StringField('answer'))
+    questionText = StringField('questionText' , validators=[Length(max=500), InputRequired()], description="Question: ")
+    questionType = SelectField('questionType', description='Question', choices=[('freeform', 'Freeform'), ('true-false', 'True/False'), ('multiple-choice', 'Multiple Choice'), ('check-all', 'Check All')])
+    correctCheckboxes = FieldList(BooleanField('correctCheckboxes'), min_entries=1) # for check-all questions
+    correctMultipleChoice = RadioField('correctMultipleChoice', choices=[('answer1', 'Answer 1'), ('answer2', 'Answer 2'), ('answer3', 'Answer 3'), ('answer4', 'Answer 4')])
+    correctTrueFalse = RadioField('correctTrueFalse', choices=[('True', 'True'), ('False', 'False')])
+    answers = FieldList(StringField('answer'), validators=[InputRequired(), Length(max=500)], min_entries=4, max_entries=4) 
     
 class QuizForm(FlaskForm):
     # Parent form - will need to implement timer, and anything else we need for the quiz
@@ -28,7 +29,8 @@ class QuizForm(FlaskForm):
 @bp.route('/create_quiz', methods=['GET', 'POST'])
 @login_required # prevents unauthenticated users from accessing this page
 def create_quiz():
-    form = QuizForm(request.form)
+    form = QuizForm()
+    questionForm = QuestionForm(prefix='subform-_-')
 
     creatorID = session.get('user_id')  
     # session data is used to store the current quiz being created
@@ -116,4 +118,4 @@ def create_quiz():
             print(e)
             flash('An error occurred while creating the quiz. Please try again.')
             return redirect(url_for('create_quiz.create_quiz'))
-    return render_template('create_quiz.html', form=form)
+    return render_template('create_quiz.html', form=form, questionForm=questionForm)

@@ -52,7 +52,7 @@
                                 {{ signupForm.csrf_token }}
                                 {{ signupForm.email.label }}   
                                 {% if signupForm.email.errors %}
-                                {{ signupForm.email(class="form-control form-control-lg is-invalid")}}
+                                {{ signupForm.email(class="form-control form-control-md is-invalid")}}
                                 <div class="invalid-feedback">
                                   {% for error in signupForm.email.errors %}
                                     <span>{{ error }}</span>
@@ -68,7 +68,7 @@
                               <br />
                               {{ signupForm.password.label }} 
                               {% if signupForm.password.errors %}
-                                {{ signupForm.password(class="form-control form-control-lg is-invalid", placeholder="Password")}}
+                                {{ signupForm.password(class="form-control form-control-md is-invalid", placeholder="Password")}}
                                 {{ signupForm.password2.label }} {{ signupForm.password2(class="form-control form-control-md", placeholder="Confirm Password")}}
                                 <div class="invalid-feedback">
                                   {% for error in signupForm.password.errors %}
