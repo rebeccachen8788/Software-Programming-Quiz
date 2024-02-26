@@ -41,11 +41,7 @@ def create_app(test_config=None):
             return redirect(url_for('creator_homepage.creator_homepage'))
         return render_template("homepage.html")
     
-    from . import results
-    app.register_blueprint(results.bp)
-    
     from . import start_quiz
     app.register_blueprint(start_quiz.bp)
-
 
     return app
