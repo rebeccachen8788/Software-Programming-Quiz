@@ -23,14 +23,13 @@ class QuestionForm(Form):
     
 class QuizForm(FlaskForm):
     # Parent form - will need to implement timer, and anything else we need for the quiz
-    timer = IntegerField('Time Limit', description="minutes", widget=NumberInput(min=5, max=180))
+    timer = IntegerField('Time Limit', description="minutes", widget=NumberInput(min=5, max=180), validators=[InputRequired()])
     questions = FieldList(FormField(QuestionForm))
  
 @bp.route('/create_quiz', methods=['GET', 'POST'])
 @login_required # prevents unauthenticated users from accessing this page
 def create_quiz():
-    form = QuizForm()
-    questionForm = QuestionForm(prefix='subform-_-')
+    form = QuizForm(request.form)
 
     creatorID = session.get('user_id')  
     # session data is used to store the current quiz being created
@@ -80,8 +79,10 @@ def create_quiz():
                     question_type = request.form[f'subform-{question_number}-questionType']
                     
                     # Extract correct answers
+                    correct_answers = []
                     if question_type == "check-all":
-                        correct_answers = request.form.getlist(f'subform-{question_number}-correctCheckboxes')
+                        print(key, value)
+                                       
                     elif question_type == "multiple-choice" or question_type == "true-false":
                         correct_answers = request.form.get(f'subform-{question_number}-correctRadio')
                     
@@ -118,4 +119,4 @@ def create_quiz():
             print(e)
             flash('An error occurred while creating the quiz. Please try again.')
             return redirect(url_for('create_quiz.create_quiz'))
-    return render_template('create_quiz.html', form=form, questionForm=questionForm)
+    return render_template('create_quiz.html', form=form)
