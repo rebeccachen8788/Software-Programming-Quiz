@@ -31,7 +31,6 @@ def insert_new_link_id(quiz_id, taker_email):
     return None
 
 
-
 def generate_quiz_link(link_id):
     # Generate quiz taking link based on database
     return f"/take_quiz/{link_id}"
@@ -110,23 +109,23 @@ def get_quiz_creator_email(quiz_id):
 @bp.route('/quiz_send', methods=['GET', 'POST'])
 def quiz_send():
     if request.method == 'POST':
-        names = request.form.getlist('name[]')
-        emails = request.form.getlist('email[]')
-        messages = request.form.getlist('message[]')
+        name = request.form.get('name')  # Assuming single name field
+        email = request.form.get('email')  # Assuming single email field
+        message = request.form.get('message')  # Assuming single message field
         quiz_id = request.form['quiz_id']  # Assuming we get the quiz ID from the form
-        link_ids = []
-        # Insert a new linkID for each recipient and store it in the link_ids list
-        for email in emails:
-            link_id = insert_new_link_id(quiz_id, email)
-            if link_id:
-                link_ids.append(link_id)
-            else:
-                # Handle error if linkID insertion fails
-                return "Failed to generate quiz link. Please try again.", 500
-        send_email(names, emails, messages, link_ids)
-        return render_template('email_sent.html')    
+        
+        # Insert a new linkID for the recipient
+        link_id = insert_new_link_id(quiz_id, email)
+        if link_id:
+            # Send email to the recipient
+            send_email(name, email, message, link_id)
+            return render_template('email_sent.html')
+        else:
+            # Handle error if linkID insertion fails
+            return "Failed to generate quiz link. Please try again.", 500
     else:
         return render_template('quiz_send.html')
+
 
     
 # Route to send quiz results
@@ -253,7 +252,7 @@ def send_quiz_results_email(quiz_creator_email, quiz_title, quiz_results):
 def store_link_quiz_association(link_id, quiz_id):
     query = """
         INSERT INTO Results (linkID, quizID, takerID, timeTaken)
-        VALUES (%s, %s, NULL, NULL)
+        VALUES (%s, %s, DEFAULT, NULL)
     """
     db_connection = get_db_connection()
     if db_connection:
