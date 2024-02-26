@@ -25,6 +25,9 @@ def create_app(test_config=None):
     app.register_blueprint(email.bp)
 
     # from .auth import login_required
+
+    from . import take_quiz
+    app.register_blueprint(take_quiz.bp)
     
     @app.route("/")
     # @login_required -> prevents unauthenticated users from accessing this page
