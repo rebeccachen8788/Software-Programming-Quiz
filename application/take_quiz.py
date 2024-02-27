@@ -16,11 +16,24 @@ class DynamicQuizForm(FlaskForm):
     submit = SubmitField('Submit')
 
 
-@bp.route('/take_quiz/<int:quizID>', methods=['GET', 'POST'])
-# eventually quizID needs to be replaced with the linkID
-def show_quiz(quizID):
+@bp.route('/take_quiz/<int:linkID>', methods=['GET', 'POST'])
+def show_quiz(linkID):
     db = get_db_connection()
     cursor = db.cursor(dictionary=True)
+
+    # retrieve quizID associated with the linkID
+    cursor.execute("SELECT quizID, completed FROM Results WHERE linkID = %s", (linkID,))
+    result = cursor.fetchall()
+
+    if not result:
+        flash('There was an issue retrieving your quiz. Please try again.', 'error')
+        return render_template('c.html')
+    else:
+        completed = result[0]['completed']
+        if completed:
+            flash('There was an issue retrieving your quiz. Please try again.', 'error')
+            return render_template('error_page.html')
+        quizID = result[0]['quizID']
 
     # Fetch questions for the quiz
     cursor.execute("SELECT * FROM Question WHERE quizID = %s", (quizID,))
@@ -46,6 +59,7 @@ def show_quiz(quizID):
 
     form = FilledQuizForm()
 
+    # collect response data
     if request.method == 'POST' and form.validate():
         responses = []
         for field_name, value in form.data.items():
@@ -60,8 +74,22 @@ def show_quiz(quizID):
         # Save responses to the database
         try:
             for quizID, question_id, answer in responses:
-                cursor.execute("INSERT INTO Response (quizID, questionID, response) VALUES (%s, %s, %s)",
-                               (quizID, question_id, answer))
+                # answer represent answerID (except for the freeform) therefore I am fetching answer details
+                cursor.execute("SELECT details FROM Answers WHERE answerID = %s", (answer,))
+                result = cursor.fetchall()
+                if not result:
+                    answer_details = answer
+                    print(answer_details)
+                else:
+                    answer_details = result[0]['details']
+                    print(answer_details)
+
+                cursor.execute("INSERT INTO Response (linkID, questionID, response) VALUES (%s, %s, %s)",
+                               (linkID, question_id, answer_details))
+
+            # Updating Results.completed so that users don't take the quiz twice
+            # This is where we can update the TIMER later on
+            cursor.execute("UPDATE Results SET completed = %s WHERE linkID = %s", (True, linkID))
             db.commit()
             flash('Your responses have been submitted successfully!', 'success')
         except Exception as err:
@@ -72,7 +100,7 @@ def show_quiz(quizID):
         cursor.close()
         db.close()
         # this should be directed to the confirmation page
-        return redirect(url_for('take_quiz.show_quiz', quizID=quizID))
+        return render_template('confirmation.html')
     else:
         db.commit()
         cursor.close()
