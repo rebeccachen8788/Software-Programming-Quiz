@@ -64,7 +64,6 @@ def create_quiz():
             query = "UPDATE Quiz SET time = %s WHERE quizID = %s"
             cursor.execute(query, (form.timer.data, session['quiz_id']))
             seen_questions = set()
-            print(form.questions)
             # Loop over each question in the form and insert into the database
             for key, value in request.form.items():
                 if key.startswith('subform-'):
@@ -81,8 +80,8 @@ def create_quiz():
                     # Extract correct answers
                     correct_answers = []
                     if question_type == "check-all":
-                        print(key, value)
-                                       
+                        correct_answers = request.form.getlist(f'subform-{question_number}-correctCheckbox')
+                                                                       
                     elif question_type == "multiple-choice" or question_type == "true-false":
                         correct_answers = request.form.get(f'subform-{question_number}-correctRadio')
                     

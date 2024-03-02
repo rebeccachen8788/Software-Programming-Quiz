@@ -6,20 +6,30 @@
 {% block title %}New Quiz{% endblock %}
 {% block head %}
   {{ super() }}
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
-    <!-- jQuery -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+     <!-- Bootstrap CSS -->
+     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+     <!-- jQuery -->
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+     <!-- Popper.js -->
+     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+     <!-- Bootstrap JS -->
+     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 {% endblock %}
 {% block content %}
+
+<div class="container text-center mt-5">
     <h1>Create a Quiz</h1>
-    <!-- true-false template-->
     
-    <div class="template-form" id="template-true-false" style="display: none" questionType=>
-        <label for="questionText" class="form-label">Question Text:</label>
+ <!-- true-false template-->
+<div class="template-form question-container border border-dark p-3 mb-3 position-relative" id="template-true-false" style="display: none" questionType=>
+    <div class="d-flex justify-content-end">
+        <a href="#" class="remove">Delete</a>
+    </div>
+    <div class="text-left">
+        <legend>Question <span class="question-number"/></legend>
         <input type="text" name="questionText" class="form-control" id="questionText" required>
         <fieldset>
-            <legend>Answer Choices:</legend>
+            <legend>Answer Choices</legend>
             <div>
                 <input type="radio" id="true" name="correctRadio" value="True" unchecked required>
                 <label for="true">True</label>
@@ -29,17 +39,20 @@
                 <label for="false">False</label>
             </div>
         </fieldset>
-        <br />
         <input type="hidden" name="questionType" value="true-false">
-
     </div>
+</div>
+
 
     <!-- Multiple Choice template-->
-    <div class="template-form" id="template-multiple-choice" style="display: none">
-        <label for="questionText">Question Text:</label>
-        <input type="text" name="questionText" required>
-
-        <legend>Answer Choices:</legend>
+    <div class="template-form question-container border border-dark p-3 mb-3 position-relative" id="template-multiple-choice" style="display: none">
+        <div class="d-flex justify-content-end">
+            <a href="#" class="remove">Delete</a>
+        </div>
+        <div class="text-left">
+        <legend>Question <span class="question-number"/></legend>
+        <input type="text" name="questionText" class="form-control" id="questionText" required>
+        <legend>Answer Choices</legend>
         <div class="mb-3">
             <input type="radio" id="correctAnswer1" name="correctRadio" value="answer1" required>
             <label for="correctAnswer1" class="form-label">Answer 1</label>
@@ -60,52 +73,58 @@
             <label for="correctAnswer4" class="form-label">Answer 4</label>
             <input type="text" class="form-control" id="textAnswer4" name="answer4" placeholder="Type answer option here" required>
         </div>
-        <br />
         <input type="hidden" name="questionType" value="multiple-choice">
-    </select>
+        </div>
     </div>
 
     <!-- Check All template-->
-    <div class="template-form" id="template-check-all" style="display: none">
-        <label for="questionText">Question Text:</label>
-        <input type="text" name="questionText" id="mquestionText" required>
-    
-        <legend>Answer Choices:</legend>
+    <div class="template-form question-container border border-dark p-3 mb-3 position-relative" id="template-check-all" style="display: none">
+        <div class="d-flex justify-content-end">
+            <a href="#" class="remove">Delete</a>
+        </div>
+        <div class="text-left">
+        <legend>Question <span class="question-number"/></legend>
+        <input type="text" name="questionText" class="form-control" id="questionText" required>
+        <legend>Answer Choices</legend>
         <div class="mb-3">
-            <input type="checkbox" id="mcorrectAnswer1" name="correctCheckboxes1" value="answer1" class="check-all">
+            <input type="checkbox" id="mcorrectAnswer1" name="correctCheckbox" value="answer1" class="check-all">
             <label for="correctAnswer1" class="form-label">Answer 1</label>
             <input type="text" class="form-control" name="answer1" id="mtextAnswer1" placeholder="Type answer option here" required>
         </div>
         <div class="mb-3">
-            <input type="checkbox" id="mcorrectAnswer2" name="correctCheckboxes2" value="answer2" class="check-all">
+            <input type="checkbox" id="mcorrectAnswer2" name="correctCheckbox" value="answer2" class="check-all">
             <label for="correctAnswer2" class="form-label">Answer 2</label>
             <input type="text" class="form-control" name="answer2" id="mtextAnswer2" placeholder="Type answer option here" required>
         </div>
         <div class="mb-3">
-            <input type="checkbox" id="mcorrectAnswer3" name="correctCheckboxes3" value="answer3" class="check-all">
+            <input type="checkbox" id="mcorrectAnswer3" name="correctCheckbox" value="answer3" class="check-all">
             <label for="correctAnswer3" class="form-label">Answer 3</label>
             <input type="text" class="form-control" name="answer3" id="mtextAnswer3" placeholder="Type answer option here" required>
         </div>
         <div class="mb-3">
-            <input type="checkbox" id="mcorrectAnswer4" name="correctCheckboxes4" value="answer4" class="check-all">
+            <input type="checkbox" id="mcorrectAnswer4" name="correctCheckbox" value="answer4" class="check-all">
             <label for="correctAnswer4" class="form-label">Answer 4</label>
             <input type="text" class="form-control" name="answer4" id="mtextAnswer4" placeholder="Type answer option here" required>
         </div>        
-        <br />
         <input type="hidden" name="questionType" value="check-all">
+        </div>
     </div>    
 
     <!-- Freeform template-->
-    <div class="template-form" id="template-freeform" style="display: none">
-        <label for="questionText">Question Text:</label>
-            <input type="text" name="questionText" required>
-        <br />
+    <div class="template-form question-container border border-dark p-3 mb-3 position-relative" id="template-freeform" style="display: none">
+        <div class="d-flex justify-content-end">
+            <a href="#" class="remove">Delete</a>
+        </div>
+        <div class="text-left">
+        <legend>Question <span class="question-number"/></legend>
+        <input type="text" name="questionText" class="form-control" id="questionText" required>
         <input type="hidden" name="questionType" value="freeform">
+        </div>
     </div>
 
     <form id="quiz" method="POST" action="">
         <!-- Container to hold dynamically created subforms -->
-    <div id="subforms-container">
+    <div id="subforms-container" class="mx-auto">
     </div>
 
     <!-- question type selection and add button -->
@@ -123,11 +142,12 @@
     <div class="mb-3" required>
        {{form.timer.label}} {{ form.timer }} {{ form.timer.description }}
     </div>
-    
     <br />
+    <div id="error-message" class="text-danger"></div>
     <button type="submit" id="submit" class="btn btn-primary">Submit Quiz</button>
     {{ form.csrf_token }}
     </form>
+</div>
 </html>
 
 <script>
@@ -136,7 +156,6 @@
 function addForm() {
     var questionType = $('#questionType').val();
     var $templateForm = $('#template-' + questionType);
-    console.log(questionType);
     if ($templateForm.length === 0) {
         console.log('[ERROR] Cannot find template');
         return;
@@ -145,26 +164,20 @@ function addForm() {
     // Get Last index
     var $lastForm = $('.subform').last();
 
-    var newIndex = 0;
+    var newIndex = 1;
 
     if ($lastForm.length > 0) {
         newIndex = parseInt($lastForm.data('index')) + 1;
     }
 
-    // Maximum of 50 questions
-    if (newIndex >= 50) {
-        console.log('[WARNING] Reached maximum number of questions');
-        return;
-    }
-
-    // Add elements
+    // Add questions 
     var $newForm = $templateForm.clone().show(); // clone template and make it visible
 
     $newForm.attr('id', 'subform-' + newIndex); // Assign a unique ID to the new form
     $newForm.addClass('subform'); // Add the 'subform' class to the new form
     $newForm.data('index', newIndex);
     $newForm.find('input[name="questionType"]').val(questionType); // Set questionType value
-
+    $newForm.find('.question-number').text(newIndex);
     $newForm.find('label, input, select, textarea').each(function(idx) {
         var $item = $(this);
 
@@ -187,7 +200,7 @@ function addForm() {
     $('#subforms-container').append($newForm);
     $newForm.addClass('subform');
     $newForm.removeClass('is-hidden');
-    $newForm.find('.remove').click(removeForm);
+    $newForm.find('.remove').click(removeQuestion);
         // Re-bind the click event handler to checkboxes in the newly added form
     $newForm.find('input[type="checkbox"]').click(function() {
         // Toggle the checked attribute of the corresponding checkbox
@@ -206,21 +219,39 @@ function addForm() {
 }
 
 
-// Function to remove a form - NOT TESTED
-function removeForm() {
-    var $removedForm = $(this).closest('.subform');
-    var removedIndex = parseInt($removedForm.data('index'));
+// Function to remove a question
+function removeQuestion() {
+    var $removedQuestion = $(this).closest('.subform');
+    var removedIndex = parseInt($removedQuestion.data('index'));
     var questionId = 'subform-' + removedIndex;
 
-    $removedForm.remove();
-
-    // Remove the associated correct answer when removing the form
-    delete correctAnswers[questionId];
+    $removedQuestion.remove();
 
     // Update indices
     adjustIndices(removedIndex);
+
+    $('.subform').each(function(index) {
+        $(this).find('.question-number').text(index + 1);
+    })
 }
 
+
+// Function to adjust indices after removing a question
+function adjustIndices(removedIndex) {
+    // Iterate over all forms after the removed index and update their indices
+    $('.subform').each(function() {
+        var currentIndex = parseInt($(this).data('index'));
+        if (currentIndex > removedIndex) {
+            $(this).data('index', currentIndex - 1);
+            // Update IDs and names of elements inside the form
+            $(this).find('[id], [name]').each(function() {
+                var newName = $(this).attr('name').replace('-' + currentIndex + '-', '-' + (currentIndex - 1) + '-');
+                $(this).attr('id', $(this).attr('id').replace('-' + currentIndex + '-', '-' + (currentIndex - 1) + '-'));
+                $(this).attr('name', newName);
+            });
+        }
+    });
+}
 // validate checkbox selection before submission
 function validateForm() {
     console.log('Validating form...');
@@ -228,7 +259,7 @@ function validateForm() {
 
     // Select all dynamically created forms
     var dynamicForms = document.querySelectorAll('#subforms-container .subform');
-
+    invalidQuestions = []; 
     // Iterate over each form
     dynamicForms.forEach(function(form) {
         var checkboxes = form.querySelectorAll('input.check-all[type="checkbox"]');
@@ -241,31 +272,38 @@ function validateForm() {
             }
         });
 
-        console.log('Number of checkboxes found:', checkboxes.length);
-        console.log('Number of checkboxes checked:', checkedCount);
-        
         if (checkboxes.length > 0 && checkedCount === 0) {
             isValid = false;
-            return false; // Exit the loop early if one form is invalid
+            questionId = form.getAttribute('id');
+            //push question number to invalidQuestions array, without prefix
+            invalidQuestions.push(questionId.replace('subform-', ''));
+
         }
     });
+        // Log invalid questions
+        if (invalidQuestions.length > 0) {
+            console.log('Invalid questions: ' + invalidQuestions.join(', '))
+        };
 
+    // Display error message if there are invalid questions, otherwise clear errors
     if (!isValid) {
-        console.log('Form is invalid.');
+        var errorMessage = "Please select at least one correct option for the following question(s): ";
+        errorMessage += invalidQuestions.join(", ");
+        document.getElementById("error-message").textContent = errorMessage;
     } else {
-        console.log('Form is valid.');
+        document.getElementById("error-message").textContent = "";
     }
 
     return isValid;
-}
+};
 
 
 // Function to handle checkbox click using event delegation
 $(document).on('click', 'input[type="checkbox"].check-all', function() {
     var checkboxId = $(this).attr('id');
     var labelFor = $('label[for="' + checkboxId + '"]');
-    
-    // Check if the checkbox is checked
+
+    // Change checkbox value when selected
     if ($(this).is(':checked')) {
         labelFor.addClass('checked');
     } else {
@@ -276,14 +314,15 @@ $(document).on('click', 'input[type="checkbox"].check-all', function() {
 
 $(document).ready(function() {
     $('#add').click(addForm); // Bind addForm function to click event of Add button
-    $('.remove').click(removeForm); // Bind removeForm function to click event of Remove button NOT TESTED
+    $('.remove').click(removeQuestion); // Bind removeQuestion function to click event of Remove button
     // Intercept form submission
     $('#quiz').submit(function(event) {
+        console.log("okay you submitted!!!");
         // Call the validation function before submitting the form
         if (!validateForm()) {
             // Prevent form submission if validation fails
-            event.preventDefault();
             console.log('Form submission prevented due to validation errors.');
+            event.preventDefault();
         } else {
             console.log('Form submitted successfully.');
         }

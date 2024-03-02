@@ -17,10 +17,23 @@
     <div class="top-content">
         <div class="inner-bg">
             <div class="container">
+              <!-- display alerts -->
               {% for message in get_flashed_messages() %}
                   {% if message %}
-                      <div class="flash">{{ message }}</div>
-                  {% endif %}                            
+                    {% if message.startswith("Signup Successful") or message=="You have been logged out." %}
+                        <div class="alert alert-success" role="alert">
+                          {{ message }}
+                        </div>
+                    {% elif message.startswith("Email") or message.startswith("Incorrect password") %} 
+                        <div class="alert alert-warning" role="alert">
+                          {{ message }}
+                        </div>      
+                    {% else %}           
+                        <div class="alert alert-danger" role="alert">
+                          {{ message }}
+                        </div>
+                    {% endif %}    
+                  {% endif %}                        
               {% endfor %}
                 <div class="row">
                     <br/>
@@ -81,14 +94,11 @@
                                 {% endif %}
                               <br />
                               {{ signupForm.submit() }}
-                              <br />
-                              
+                              <br />     
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
     {% endblock %}
-
 </html>
