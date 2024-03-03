@@ -30,39 +30,24 @@ class QuizForm(FlaskForm):
 @login_required # prevents unauthenticated users from accessing this page
 def create_quiz():
     form = QuizForm(request.form)
-
-    creatorID = session.get('user_id')  
-    # session data is used to store the current quiz being created
-    if 'quiz_id' not in session:
+    creatorID = session['user_id']
+    
+    if form.validate_on_submit():
+        # create new quiz in database
         try:
             db = get_db_connection()
             cursor = db.cursor()
             
             # create new quiz entry for user
             cursor.execute("INSERT INTO Quiz (creatorID, time) VALUES (%s, %s)", (creatorID, 0))
-            db.commit()
             
             # retrieve the quizID
             cursor.execute("SELECT LAST_INSERT_ID()")
             quiz_id = cursor.fetchone()[0]
-            
-            # store quizID in session            
-            session['quiz_id'] = quiz_id
-            cursor.close()
-            db.close()
-        except Exception as e:
-            print(e)
-            flash('An error occurred while creating the quiz. Please try again.')
-            return render_template('homepage.html')
-            
-    if form.validate_on_submit():
-        # form validation by Flask-WTF
-        try: 
-            db = get_db_connection()
-            cursor = db.cursor()
+
             # set time limit for quiz
             query = "UPDATE Quiz SET time = %s WHERE quizID = %s"
-            cursor.execute(query, (form.timer.data, session['quiz_id']))
+            cursor.execute(query, (form.timer.data, quiz_id))
             seen_questions = set()
             # Loop over each question in the form and insert into the database
             for key, value in request.form.items():
@@ -98,7 +83,7 @@ def create_quiz():
                                 all_answers.append([answer, option in correct_answers])
                     
                     # Insert question into database and retrieve questionID
-                    cursor.execute("INSERT INTO Question (quizID, type, details, score) VALUES (%s, %s, %s, %s)", (session['quiz_id'], question_type, question_text, 1))
+                    cursor.execute("INSERT INTO Question (quizID, type, details, score) VALUES (%s, %s, %s, %s)", (quiz_id, question_type, question_text, 1))
                     if question_type != "freeform":
                         cursor.execute("SELECT LAST_INSERT_ID()")
                         question_id = cursor.fetchone()[0]
@@ -111,8 +96,6 @@ def create_quiz():
             cursor.close()
             db.close()
             print('Quiz created successfully!')
-            # remove quizID from session
-            session.pop('quiz_id', None)
             return redirect(url_for('root'))
         except Exception as e:
             print(e)
