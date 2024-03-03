@@ -142,11 +142,13 @@
     <div class="mb-3" required>
        {{form.timer.label}} {{ form.timer }} {{ form.timer.description }}
     </div>
-    <br />
-    <div id="error-message" class="text-danger"></div>
+    <div id="error-message" class="alert alert-danger" style="display: none;"></div>
     <button type="submit" id="submit" class="btn btn-primary">Submit Quiz</button>
+    <!-- Cancel button -->
+    <a href="{{ url_for('root') }}" class="btn btn-secondary">Cancel</a>
     {{ form.csrf_token }}
     </form>
+
 </div>
 </html>
 
@@ -163,7 +165,6 @@ function addForm() {
 
     // Get Last index
     var $lastForm = $('.subform').last();
-
     var newIndex = 1;
 
     if ($lastForm.length > 0) {
@@ -227,12 +228,11 @@ function removeQuestion() {
 
     $removedQuestion.remove();
 
-    // Update indices
     adjustIndices(removedIndex);
 
     $('.subform').each(function(index) {
         $(this).find('.question-number').text(index + 1);
-    })
+    });
 }
 
 
@@ -241,7 +241,7 @@ function adjustIndices(removedIndex) {
     // Iterate over all forms after the removed index and update their indices
     $('.subform').each(function() {
         var currentIndex = parseInt($(this).data('index'));
-        if (currentIndex > removedIndex) {
+        if (currentIndex >= removedIndex) {
             $(this).data('index', currentIndex - 1);
             // Update IDs and names of elements inside the form
             $(this).find('[id], [name]').each(function() {
@@ -249,18 +249,20 @@ function adjustIndices(removedIndex) {
                 $(this).attr('id', $(this).attr('id').replace('-' + currentIndex + '-', '-' + (currentIndex - 1) + '-'));
                 $(this).attr('name', newName);
             });
+            $(this).find('.question-number').text(currentIndex - 1);
         }
     });
+    
 }
+
 // validate checkbox selection before submission
 function validateForm() {
     console.log('Validating form...');
     var isValid = true;
 
-    // Select all dynamically created forms
+    var invalidQuestions = []; 
     var dynamicForms = document.querySelectorAll('#subforms-container .subform');
-    invalidQuestions = []; 
-    // Iterate over each form
+
     dynamicForms.forEach(function(form) {
         var checkboxes = form.querySelectorAll('input.check-all[type="checkbox"]');
         var checkedCount = 0;
@@ -277,21 +279,15 @@ function validateForm() {
             questionId = form.getAttribute('id');
             //push question number to invalidQuestions array, without prefix
             invalidQuestions.push(questionId.replace('subform-', ''));
-
         }
     });
-        // Log invalid questions
-        if (invalidQuestions.length > 0) {
-            console.log('Invalid questions: ' + invalidQuestions.join(', '))
-        };
 
     // Display error message if there are invalid questions, otherwise clear errors
     if (!isValid) {
-        var errorMessage = "Please select at least one correct option for the following question(s): ";
-        errorMessage += invalidQuestions.join(", ");
-        document.getElementById("error-message").textContent = errorMessage;
+        var errorMessage = "Please select at least one correct option for all questions.";
+        $('#error-message').text(errorMessage).show();
     } else {
-        document.getElementById("error-message").textContent = "";
+        $('#error-message').hide();
     }
 
     return isValid;
@@ -315,9 +311,7 @@ $(document).on('click', 'input[type="checkbox"].check-all', function() {
 $(document).ready(function() {
     $('#add').click(addForm); // Bind addForm function to click event of Add button
     $('.remove').click(removeQuestion); // Bind removeQuestion function to click event of Remove button
-    // Intercept form submission
     $('#quiz').submit(function(event) {
-        console.log("okay you submitted!!!");
         // Call the validation function before submitting the form
         if (!validateForm()) {
             // Prevent form submission if validation fails
@@ -330,6 +324,4 @@ $(document).ready(function() {
 });
 
 </script>
-
-
 {% endblock %}
