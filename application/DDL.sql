@@ -67,7 +67,7 @@ CREATE OR REPLACE TABLE Results (
     takerID INT NOT NULL,
     quizID INT NOT NULL,
     timeTaken INT NOT NULL,
-    totalScore INT,
+    totalScore DECIMAL(5, 2),
     completed BOOLEAN NOT NULL DEFAULT False,
     PRIMARY KEY (linkID),
     FOREIGN KEY (takerID) REFERENCES Quiz_Taker(takerID),
