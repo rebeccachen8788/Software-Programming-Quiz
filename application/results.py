@@ -1,4 +1,3 @@
-import flask_login
 from flask import Flask, redirect, render_template, request, session, url_for
 from .db_connector import get_db_connection, execute_query
 from flask import Blueprint, render_template, request

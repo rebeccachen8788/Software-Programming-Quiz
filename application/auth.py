@@ -1,7 +1,6 @@
 # Source: https://flask.palletsprojects.com/en/2.3.x/tutorial/views/
 # Accessed 2/2/24
 
-import flask_login
 from flask import Blueprint, flash, g, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 import functools
