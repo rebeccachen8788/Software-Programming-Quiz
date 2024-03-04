@@ -28,7 +28,7 @@ def show_quiz(linkID):
 
     if not result:
         flash('There was an issue retrieving your quiz. Please try again.', 'error')
-        return render_template('c.html')
+        return render_template('error_page.html')
     else:
         completed = result[0]['completed']
         if completed:
@@ -110,7 +110,7 @@ def show_quiz(linkID):
 
             # round to nearest double digits
             total_score = round(total_score, 2)
-            print(total_score)
+            # print(total_score)
             # add total score and update completed
             cursor.execute("UPDATE Results SET totalScore = %s, completed = %s WHERE linkID = %s", (total_score, True, linkID))
             db.commit()
