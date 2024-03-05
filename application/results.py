@@ -99,15 +99,15 @@ def show_taker_responses(link_id):
 def get_responses_for_taker_quiz_by_link_id(link_id):
     query = """
     SELECT 
-        Q.details AS question_details, 
-        R.response, 
-        A.correct
+    Q.details AS question_details, 
+    R.response, 
+    A.correct
     FROM 
         Question Q
     JOIN 
         Response R ON Q.questionID = R.questionID
     LEFT JOIN 
-        Answers A ON R.questionID = A.questionID AND R.response = A.details
+        Answers A ON R.questionID = A.questionID AND FIND_IN_SET(A.details, R.response) > 0
     WHERE 
         R.linkID = %s;
     """
