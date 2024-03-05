@@ -102,7 +102,7 @@ def login(flashMessage = None):
                 session.clear()
                 session['user_id'] = user['creatorID']
                 session['user_name'] = user['firstName']
-                return redirect(url_for('root'))
+                return redirect(url_for('creator_homepage.creator_homepage'))
             else:
                 flashMessage = "Incorrect password. Please try again."
         finally:
