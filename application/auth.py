@@ -138,7 +138,7 @@ def login_required(view):
     @functools.wraps(view)
     def wrapped_view(**kwargs):
         if not g.user:
-            return signup(flashMessage="Please login or signup to access your account.")
+            return redirect(url_for('root'))
         return view(**kwargs)
     
     return wrapped_view

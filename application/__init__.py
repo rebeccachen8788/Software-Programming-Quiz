@@ -1,9 +1,8 @@
 # Source: https://flask.palletsprojects.com/en/3.0.x/tutorial/factory/
 # accessed 2/2/24
 
-from flask import Flask, render_template, redirect, url_for, request
-from .db_connector import get_db_connection, execute_query
-from .results import show_results, get_responses_for_taker_quiz_by_link_id
+from flask import Flask, render_template, redirect, session, url_for, request
+from .db_connector import get_db_connection
 
 def create_app(test_config=None):
     # create and configure the app
@@ -21,10 +20,8 @@ def create_app(test_config=None):
     from . import create_quiz
     app.register_blueprint(create_quiz.bp)
     
-    from . import email_func
-    app.register_blueprint(email_func.bp)
-
-    from .auth import login_required
+    from . import email
+    app.register_blueprint(email.bp)
 
     from . import take_quiz
     app.register_blueprint(take_quiz.bp)
@@ -32,9 +29,16 @@ def create_app(test_config=None):
     from . import creator_homepage
     app.register_blueprint(creator_homepage.bp)
 
+    from . import results
+    app.register_blueprint(results.bp)
+    
+    from . import settings
+    app.register_blueprint(settings.bp)
     
     @app.route("/")
     def root():
+        if 'user_id' in session:
+            return redirect(url_for('creator_homepage.creator_homepage'))
         return render_template("homepage.html")
     
     from . import results
