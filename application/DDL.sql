@@ -79,7 +79,7 @@ CREATE OR REPLACE TABLE Response (
     responseID INT AUTO_INCREMENT UNIQUE NOT NULL,
     linkID INT NOT NULL,
     questionID INT NOT NULL,
-    response VARCHAR(255) NOT NULL,
+    response VARCHAR(255),
     PRIMARY KEY (responseID),
     FOREIGN KEY (linkID) REFERENCES Results(linkID),
     FOREIGN KEY (questionID) REFERENCES Question(questionID)

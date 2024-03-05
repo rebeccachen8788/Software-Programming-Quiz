@@ -1,7 +1,8 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, flash
 from flask_wtf import FlaskForm
-from wtforms import StringField, RadioField, SelectMultipleField, TextAreaField, SubmitField, widgets, ValidationError
-from wtforms.validators import DataRequired, Optional
+from wtforms import RadioField, SelectMultipleField, TextAreaField, SubmitField, widgets
+from wtforms.validators import Optional
+import re
 
 from .db_connector import get_db_connection
 bp = Blueprint('take_quiz', __name__)
@@ -35,7 +36,12 @@ def show_quiz(linkID):
             flash('There was an issue retrieving your quiz. Please try again.', 'error')
             return render_template('error_page.html')
         quizID = result[0]['quizID']
-
+    
+    # Fetch time limit for the quiz
+    cursor.execute("SELECT time FROM Quiz WHERE quizID = %s", (quizID,))
+    data = cursor.fetchone()
+    time = data['time']
+    
     # Fetch questions for the quiz
     cursor.execute("SELECT * FROM Question WHERE quizID = %s", (quizID,))
     questions = cursor.fetchall()
@@ -60,7 +66,7 @@ def show_quiz(linkID):
     form = FilledQuizForm()
 
     # collect response data
-    if request.method == 'POST' and form.validate():
+    if request.method == 'POST':
         responses = []
         for field_name, value in form.data.items():
             if field_name.startswith('question_'):
@@ -70,6 +76,13 @@ def show_quiz(linkID):
                         responses.append((quizID, question_id, answer))
                 else:  # For radio fields and text areas
                     responses.append((quizID, question_id, value))
+        # get amount of time it took for quiz taker to complete the quiz from the front-tend
+        time_remaining = request.form.get('time_remaining')
+        if time_remaining.startswith('-'):
+            time_used = time
+        else:
+            time_used = calculate_time_used(time, time_remaining = request.form.get('time_remaining'))
+        
         # Save responses to the database
         try:
             total_score = 0
@@ -128,6 +141,11 @@ def show_quiz(linkID):
         cursor.close()
         db.close()
         # Handling GET request or invalid form submission
-        return render_template('take_quiz.html', form=form, quizID=quizID)
+        return render_template('take_quiz.html', form=form, quizID=quizID, time_limit = time * 60 * 1000)
 
-
+def calculate_time_used(time, time_remaining):
+    # split time_remaining by both letter and comma, leaving just ints
+    time_remaining = re.split(r"\D", time_remaining)
+    hours = int(time_remaining[0])
+    minutes = int(time_remaining[2])
+    return time - (hours * 60 + minutes)
