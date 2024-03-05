@@ -22,7 +22,7 @@ class QuestionForm(Form):
     answers = FieldList(StringField('answer'), validators=[InputRequired(), Length(max=500)], min_entries=4, max_entries=4) 
     
 class QuizForm(FlaskForm):
-    # Parent form - will need to implement timer, and anything else we need for the quiz
+    # Parent form
     timer = IntegerField('Time Limit', description="minutes", widget=NumberInput(min=5, max=180), validators=[InputRequired()])
     questions = FieldList(FormField(QuestionForm))
  
@@ -95,8 +95,7 @@ def create_quiz():
             db.commit()
             cursor.close()
             db.close()
-            print('Quiz created successfully!')
-            return redirect(url_for('root'))
+            return redirect(url_for('creator_homepage.creator_homepage'))
         except Exception as e:
             print(e)
             flash('An error occurred while creating the quiz. Please try again.')
