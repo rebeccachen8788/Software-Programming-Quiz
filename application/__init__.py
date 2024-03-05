@@ -39,10 +39,9 @@ def create_app(test_config=None):
     
     from . import results
     app.register_blueprint(results.bp)
+    
+    from . import start_quiz
+    app.register_blueprint(start_quiz.bp)
 
-    @app.route("/start_quiz")
-    def start_quiz():
-        # You might want to pass additional context or variables to the template based on your application logic
-        return render_template("start_quiz.html")
 
     return app

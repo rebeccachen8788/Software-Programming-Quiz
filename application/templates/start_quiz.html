@@ -18,7 +18,11 @@
             <div class="row justify-content-md-center">
                 <div class="col-sm-6">
                     <!-- Start Quiz Form -->
-                    <form id="start-quiz-form" method="get" action="{{ url_for('start_quiz') }}">
+                    {% if linkID %}
+                    <form id="start-quiz-form" method="post" action="{{ url_for('take_quiz.show_quiz', linkID=linkID) }}">
+                    {% else %}
+                    <form id="start-quiz-form" method="get" action="#">
+                    {% endif %}
                         <h3>Start the Quiz</h3>
                         <p>Click the button below to start the quiz.</p>
                         <button type="submit" class="btn btn-primary">Start Quiz</button>
