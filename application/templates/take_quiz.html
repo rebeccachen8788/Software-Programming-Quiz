@@ -15,13 +15,7 @@
 {% endblock %}
 {% block content %}
 <body>
-<div class="container mt-5">
-    <!-- Timer -->
-    <div class="row fixed-top ml-3">
-        <div class="bg-white">
-            <p>Time remaining: <span id="timer"></span></p>
-        </div>
-    </div>
+<div class="container p-3 mb-5">
     <!-- Quiz-->
     <h2 class="mb-4">Quiz</h2>
     <form method="POST" action="">
@@ -30,7 +24,7 @@
             {% if field.type != "CSRFTokenField" and field.type != "SubmitField" %}
                 <div class="mb-3">
                     {% if field.type == "RadioField" or field.type == "MultiCheckboxField" %}
-                        <label class="form-label d-block">{{ field.label }}</label>
+                        <label class="form-label d-block">{{loop.index0}}. {{ field.label }}</label>
                         {% for subfield in field %}
                             <div class="form-check">
                                 {{ subfield(class="form-check-input") }}
@@ -38,12 +32,12 @@
                             </div>
                         {% endfor %}
                     {% elif field.type == "TextAreaField" %}
-                        <label class="form-label">{{ field.label }}</label>
+                        <label class="form-label">{{loop.index0}}. {{ field.label }}</label>
                         {{ field(class="form-control", rows=3) }}
                     {% else %}
-                        <label class="form-label">{{ field.label }}</label>
+                        <label class="form-label">{{loop.index0}}. {{ field.label }}</label>
                         {{ field(class="form-control") }}
-                    {% endif %}
+                    {% endif -%}
                     {% if field.errors %}
                         {% for error in field.errors %}
                             <div class="invalid-feedback d-block">{{ error }}</div>
@@ -54,6 +48,12 @@
         {% endfor %}
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
+</div>
+ <!-- Timer -->
+ <div class="row fixed-bottom ml-0 bg-white">
+    <div class="bg-warning text-center px-3 pt-1">
+        <p>Time remaining: <span id="timer"></span></p>
+    </div>
 </div>
 <!-- Bootstrap JS, including jQuery and Popper.js -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

@@ -50,6 +50,7 @@ def show_quiz(linkID):
         pass
 
     for question in questions:
+        print(question)
         field_name = f"question_{question['questionID']}"
         cursor.execute("SELECT * FROM Answers WHERE questionID = %s", (question['questionID'],))
         answers = cursor.fetchall()
@@ -125,7 +126,7 @@ def show_quiz(linkID):
             total_score = round(total_score, 2)
             # print(total_score)
             # add total score and update completed
-            cursor.execute("UPDATE Results SET totalScore = %s, completed = %s WHERE linkID = %s", (total_score, True, linkID))
+            cursor.execute("UPDATE Results SET totalScore = %s, completed = %s, timeTaken = %s WHERE linkID = %s", (total_score, True, time_used, linkID))
             db.commit()
         except Exception as err:
             print(f"Error1: {err}")
