@@ -124,24 +124,31 @@
 
     <form id="quiz" method="POST" action="">
         <!-- Container to hold dynamically created subforms -->
-    <div id="subforms-container" class="mx-auto">
+    <div id="subforms-container" class="mx-auto p-3">
     </div>
 
     <!-- question type selection and add button -->
         <label for="questionType">Select Question Type:</label>
-        <select name="questionType" id="questionType">
+        <select name="questionType" id="questionType" class="form-select">
             <option value="">--Choose a Type--</option>
             <option value="true-false">True/False</option>
             <option value="multiple-choice">Multiple Choice</option>
             <option value="check-all">Check all that apply</option>
             <option value="freeform">Freeform</option>
         </select>
-        <button type="button" id="add">Add</button>
+        <button type="button" class="btn btn-info btn-sm" id="add">Add</button>
     <!-- submit quiz button -->
     <br />
     <div class="mb-3" required>
        {{form.timer.label}} {{ form.timer }} {{ form.timer.description }}
     </div>
+    {% for message in get_flashed_messages()%}
+        {% if message %}
+            <div class="alert alert-{{message[1]}}" role="alert">
+                {{ message[0] }}
+            </div>
+        {% endif %}
+    {% endfor %}
     <div id="error-message" class="alert alert-danger" style="display: none;"></div>
     <button type="submit" id="submit" class="btn btn-primary">Submit Quiz</button>
     <!-- Cancel button -->

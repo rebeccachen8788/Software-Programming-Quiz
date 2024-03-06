@@ -1,7 +1,7 @@
-from flask_wtf import FlaskForm, Form
+from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, EqualTo, Length, ValidationError
-from flask import Blueprint, render_template, redirect, url_for, flash, session, get_flashed_messages
+from flask import Blueprint, render_template, flash, session, get_flashed_messages
 from werkzeug.security import check_password_hash, generate_password_hash
 from .db_connector import get_db_connection
 from .auth import login_required
@@ -134,13 +134,13 @@ def delete_account():
             cursor.execute(query, (user_id,))
             db.commit()
             session.clear()
-            return redirect(url_for('auth.login'))
+            flash(("Your account has been deleted.", 'success'))
+            return render_template('deleted_account.html', messages=get_flashed_messages())
         except Exception as e:
             flash((e, 'danger'))
         finally:
             cursor.close()
             db.close()
-            return render_template('deleted_account.html', messages=get_flashed_messages())
     else:
         for field, errors in form.errors.items():
             for error in errors:

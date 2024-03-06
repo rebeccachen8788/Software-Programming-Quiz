@@ -19,7 +19,16 @@
                 {{message[0]}}
             </div>
         {% endfor %}
-        <section class="mb-3 p-5 p-lg-0 pt-lg-5 text-center text-sm-start border border-dark position-relative">
+        <!-- Account information -->
+        <section class="mx-auto mb-3 p-5 p-lg-0 pt-lg-5 text-center text-sm-start border border-dark position-relative">
+            <h2 class="display-5">Account Information</h2>
+            <div class="text-left">
+                <p><b>Name:</b> {{session['user_name']}} {{session['user_last_name']}}</p>
+                <p><b>Email:</b> {{session['user_email']}}</p>
+            </div>
+        </section>
+        <!-- change password -->
+        <section class="mx-auto mb-3 p-5 p-lg-0 pt-lg-5 text-center text-sm-start border border-dark position-relative">
             <h2 class="display-5">Change Password</h2>
             <div class="text-left">
 
@@ -37,7 +46,7 @@
             </form>
         </div>
         </section>
-        <section class="mb-3 p-5 p-lg-0 pt-lg-5 text-center text-sm-start border border-dark position-relative">
+        <section class="mx-auto mb-3 p-5 p-lg-0 pt-lg-5 text-center text-sm-start border border-dark position-relative">
             <h2 class="display-5">Change Name</h2>
             <div class="text-left">
             <form id="change-name-form" method="post" action="change_name">
@@ -53,7 +62,7 @@
                 </div>
             </form>
         </section>
-        <section class="mb-5 p-5 p-lg-0 pt-lg-5 text-center text-sm-start border border-dark position-relative">
+        <section class="mx-auto mb-5 p-5 p-lg-0 pt-lg-5 text-center text-sm-start border border-dark position-relative">
             <h2 class="display-5">Delete Account</h2>
             <div class="text-left">
             <form id="delete-account-form" method="post" action="delete_account">
