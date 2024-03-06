@@ -1,9 +1,9 @@
 # Adapted from https://www.rmedgar.com/blog/dynamic-fields-flask-wtf/ with the help of chatGPT
 
-from flask import flash, Blueprint, render_template, redirect, session, url_for, request
+from flask import flash, get_flashed_messages, Blueprint, render_template, redirect, session, url_for, request
 from flask_wtf import FlaskForm, Form
 from wtforms import BooleanField, FieldList, FormField, IntegerField, RadioField, SelectField, StringField
-from wtforms.validators import InputRequired, Length, ValidationError
+from wtforms.validators import InputRequired, Length
 from wtforms.widgets import NumberInput
 
 from .db_connector import get_db_connection
@@ -97,7 +97,6 @@ def create_quiz():
             db.close()
             return redirect(url_for('creator_homepage.creator_homepage'))
         except Exception as e:
-            print(e)
-            flash('An error occurred while creating the quiz. Please try again.')
+            flash((e, 'danger'))
             return redirect(url_for('create_quiz.create_quiz'))
-    return render_template('create_quiz.html', form=form)
+    return render_template('create_quiz.html', form=form, message=get_flashed_messages())
