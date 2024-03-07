@@ -17,62 +17,36 @@
             <div id="inputFields">
                 <div class="form-group">
                     <label for="name">Name</label>
-                    <input type="text" class="form-control" name="name[]" required>
+                    <input type="text" class="form-control" name="name" required>
                 </div>
                 <div class="form-group">
                     <label for="email">Email Address</label>
-                    <input type="email" class="form-control" name="email[]" required>
+                    <input type="email" class="form-control" name="email" required>
                 </div>
                 <div class="form-group">
                     <label for="message">Message</label>
                     <p>The message will be pre-filled with a greeting and their name,
                         as well as an attached link to the quiz.</p>
-                    <textarea class="form-control" name="message[]" required></textarea>
+                    <textarea class="form-control" name="message" required></textarea>
                 </div>
                 <div class="form-group">
                     <label for="quiz_id">Select Quiz</label>
                     <select class="form-control" name="quiz_id" required>
                         {% if quizzes %}
                             {% for quiz in quizzes %}
-                                <option value="{{ quiz.quizID }}">{{ quiz.quizTitle }}</option>
+                                <option value="{{ quiz['QuizID'] }}">Quiz: {{ quiz['QuizID'] }}</option>
                             {% endfor %}
                         {% else %}
                             <option value="" disabled>No quizzes available</option>
                         {% endif %}
                     </select>
-                </div>
+                </div>                
                 
             </div>
-            <button type="button" class="btn btn-primary" onclick="addInputFields()">Add Another</button>
             <button type="submit" class="btn btn-primary">Send Invitation</button>
         </form>
     </div>
     
-    <script>
-        function addInputFields() {
-            const inputFields = document.getElementById('inputFields');
-            const newInputFields = document.createElement('div');
-            newInputFields.innerHTML = `
-                <div class="form-group">
-                    <label for="name">Name</label>
-                    <input type="text" class="form-control" name="name[]" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <input type="email" class="form-control" name="email[]" required>
-                </div>
-                <button type="button" class="btn btn-danger" onclick="removeInputFields(this)">Remove</button>
-            `;
-            inputFields.appendChild(newInputFields);
-        }
-
-        function removeInputFields(button) {
-            const inputFields = button.parentElement;
-            inputFields.remove();
-        }
-
-    </script>
-
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" integrity="sha384-w1Q4orYjBQndcko6MimVbzY0tgp4pWB4lZ7lr30WKz0vr/aWKhXdBNmNb5D92v7s" crossorigin="anonymous"></script>

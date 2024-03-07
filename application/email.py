@@ -12,16 +12,50 @@ API_KEY = '4f4724f09fd7d7127aa5f0d5d17fed1d'
 API_SECRET = 'e069a58167f81de0de76dfb6ec4c3255'
 mailjet = Client(auth=(API_KEY, API_SECRET), version='v3.1')
 
-def insert_new_link_id(quiz_id, taker_email):
-    """Inserts a new linkID into the Results table for the provided quizID."""
-    query = "INSERT INTO Results (quizID, takerID) VALUES (%s, (SELECT takerID FROM Quiz_Taker WHERE takerEmail = %s))"
+def get_or_create_taker_id(email, name):
+    """Retrieve or create a Quiz_Taker and return the takerID."""
     db_connection = get_db_connection()
     if db_connection:
         try:
             cursor = db_connection.cursor()
-            cursor.execute(query, (quiz_id, taker_email))
+            # Check if Quiz_Taker with the given email already exists
+            cursor.execute("SELECT takerID FROM Quiz_Taker WHERE takerEmail = %s", (email,))
+            taker_id = cursor.fetchone()
+            if taker_id:
+                return taker_id[0]  # Return existing takerID
+            else:
+                # Insert a new Quiz_Taker
+                cursor.execute("INSERT INTO Quiz_Taker (takerEmail, firstName) VALUES (%s, %s)", (email, name))
+                db_connection.commit()
+                return cursor.lastrowid  # Return auto-generated takerID
+        except Exception as e:
+            print(f"Error retrieving or creating Quiz_Taker: {e}")
+            db_connection.rollback()
+        finally:
+            cursor.close()
+            db_connection.close()
+    return None
+
+
+def insert_new_link_id(quiz_id, email):
+    """Insert a new linkID into the Results table for the provided quizID and takerID."""
+    db_connection = get_db_connection()
+    if db_connection:
+        try:
+            cursor = db_connection.cursor()
+            
+            # Check if takerID exists in Quiz_Taker table
+            cursor.execute("SELECT takerID FROM Quiz_Taker WHERE takerEmail = %s", (email,))
+            result = cursor.fetchone()
+            if not result:
+                print("Error: takerID does not exist in Quiz_Taker table.")
+                return None
+            
+            # Insert new linkID into Results table
+            cursor.execute("INSERT INTO Results (quizID, takerID) VALUES (%s, %s)", (quiz_id, result[0]))
             db_connection.commit()
-            return cursor.lastrowid  # Return the auto-generated linkID
+            
+            return cursor.lastrowid  # Return auto-generated linkID
         except Exception as e:
             print(f"Error inserting new linkID into Results table: {e}")
             db_connection.rollback()
@@ -31,9 +65,11 @@ def insert_new_link_id(quiz_id, taker_email):
     return None
 
 
+
 def generate_quiz_link(link_id):
     # Generate quiz taking link based on database
-    return f"/take_quiz/{link_id}"
+    #NOTE:Will need to change based on what flip server we are hosting on
+    return f"http://127.0.0.1:12118/take_quiz/{link_id}"
 
 
 def get_quiz_id_from_link(unique_id):
@@ -54,35 +90,32 @@ def get_quiz_id_from_link(unique_id):
     return None
 
 
-def send_email(names, email_addresses, messages, link_ids):
-    if email_addresses and len(email_addresses) > 0:
-        for receiver, message, name, link_id in zip(email_addresses, messages, names, link_ids):
-            quiz_link = generate_quiz_link(link_id)
+def send_email(name, email_address, message, link_id):
+    quiz_link = generate_quiz_link(link_id)
 
-            data = {
-                'Messages': [
+    data = {
+        'Messages': [
+            {
+                'From': {
+                    'Email': 'virgenlg@oregonstate.edu',
+                    'Name': 'SWE Programming Quiz'
+                },
+                'To': [
                     {
-                        'From': {
-                            'Email': 'virgenlg@oregonstate.edu',
-                            'Name': 'SWE Programming Quiz'
-                        },
-                        'To': [
-                            {
-                                'Email': receiver,
-                                'Name': name
-                            }
-                        ],
-                        'Subject': 'Quiz Invitation',
-                        'TextPart': f"Hello {name},\n\n{message}\n\nLink to the quiz: {quiz_link}."
+                        'Email': email_address,
+                        'Name': name
                     }
-                ]
+                ],
+                'Subject': 'Quiz Invitation',
+                'TextPart': f"Hello {name},\n\n{message}\n\nLink to the quiz: {quiz_link}."
             }
+        ]
+    }
 
-            # Send the email
-            response = mailjet.send.create(data=data)
-            print(f'Sent to {receiver}')
-    else:
-        print("No email addresses provided.")
+    # Send the email
+    response = mailjet.send.create(data=data)
+    print(f'Sent to {email_address}')
+
 
 def get_quiz_creator_email(quiz_id):
     """Retrieve the email address of the quiz creator from the database."""
@@ -105,23 +138,26 @@ def get_quiz_creator_email(quiz_id):
                 return result['creatorEmail']
     return None
 
-
-def get_creator_id_from_quiz_id(quiz_id):
-    """Retrieve the creator ID associated with the provided quiz ID."""
-    query = """
-        SELECT creatorID
-        FROM Quiz
-        WHERE quizID = %s
-    """
-    db_connection = get_db_connection()
-    if db_connection:
-        cursor = execute_query(db_connection, query, (quiz_id,))
-        if cursor:
-            result = cursor.fetchone()
-            db_connection.close()
-            if result:
-                return result['creatorID']
-    return None
+# I think i might not need this function
+# def get_creator_id_from_quiz_id(quiz_id):
+#     """Retrieve the creator ID associated with the provided quiz ID."""
+#     # Convert quiz_id to integer
+#     quiz_id = int(quiz_id)
+    
+#     query = """
+#         SELECT creatorID
+#         FROM Quiz
+#         WHERE quizID = %s
+#     """
+#     db_connection = get_db_connection()
+#     if db_connection:
+#         cursor = execute_query(db_connection, query, (quiz_id,))
+#         if cursor:
+#             result = cursor.fetchone()
+#             db_connection.close()
+#             if result:
+#                 return result['creatorID']
+#     return None
 
 
 def fetch_user_quizzes(user_id):
@@ -131,12 +167,12 @@ def fetch_user_quizzes(user_id):
     if db_connection:
         try:
             # Execute a query to fetch quizzes for the given user ID
-            query = "SELECT quizID, title FROM Quiz WHERE creatorID = %s"
+            query = "SELECT quizID FROM Quiz WHERE creatorID = %s"
             cursor = db_connection.cursor()
             cursor.execute(query, (user_id,))
             
             # Fetch all rows as a list of dictionaries
-            quizzes = [{'quiz_id': row[0], 'title': row[1]} for row in cursor.fetchall()]
+            quizzes = [{'QuizID': row[0]} for row in cursor.fetchall()]
             
             # Close cursor and database connection
             cursor.close()
@@ -158,14 +194,19 @@ def quiz_send():
         email = request.form.get('email')  # Assuming single email field
         message = request.form.get('message')  # Assuming single message field
         quiz_id = request.form['quiz_id']  # Assuming we get the quiz ID from the form
-        
+
         # Fetch the creator ID from the database using the quiz ID
-        creator_id = get_creator_id_from_quiz_id(quiz_id)
+        creator_id = session.get('user_id')
         if not creator_id:
             return "Quiz not found or expired.", 404
         
+        # Insert a new Quiz_Taker if not already exists
+        taker_id = get_or_create_taker_id(email, name)
+        if not taker_id:
+            return "Failed to create or retrieve Quiz_Taker.", 500
+        
         # Insert a new linkID for the recipient
-        link_id = insert_new_link_id(quiz_id, email, creator_id)
+        link_id = insert_new_link_id(quiz_id, email)
         if link_id:
             # Send email to the recipient
             send_email(name, email, message, link_id)
