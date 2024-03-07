@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_wtf import FlaskForm
 from wtforms import RadioField, SelectMultipleField, TextAreaField, SubmitField, widgets
 from wtforms.validators import Optional
+from .email_func import send_quiz_results_email
 import re
 
 from .db_connector import get_db_connection
@@ -132,6 +133,38 @@ def show_quiz(linkID):
             db.rollback()
             flash('There was an issue submitting your responses. Please try again.', 'error')
         db.commit()
+
+        # Trigger sending quiz results email after quiz submission is processed
+        try:
+            # Fetch the taker's email from the Quiz_Taker table
+            cursor.execute("""
+                SELECT takerEmail
+                FROM Quiz_Taker
+                WHERE takerID = (
+                    SELECT takerID FROM Results WHERE linkID = %s
+                )
+            """, (linkID,))
+            quiz_taker_email = cursor.fetchone()['takerEmail']
+
+            # Fetch quiz creator's email using the quizID associated with the linkID in the Results table
+            cursor.execute("""
+                SELECT creatorID
+                FROM Quiz
+                WHERE quizID = (
+                    SELECT quizID FROM Results WHERE linkID = %s
+                )
+            """, (linkID,))
+            creator_id = cursor.fetchone()['creatorID']
+            
+            # Fetch creator's email using the creatorID from the Quiz_Creator table
+            cursor.execute("SELECT creatorEmail FROM Quiz_Creator WHERE creatorID = %s", (creator_id,))
+            creator_email = cursor.fetchone()['creatorEmail']
+
+            send_quiz_results_email(creator_email, quiz_taker_email, linkID)
+
+        except Exception as e:
+            print(f"Error sending quiz results email: {e}")
+
         cursor.close()
         db.close()
         # this should be directed to the confirmation page

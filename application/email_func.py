@@ -65,29 +65,28 @@ def insert_new_link_id(quiz_id, email):
     return None
 
 
-
 def generate_quiz_link(link_id):
     # Generate quiz taking link based on database
     #NOTE:Will need to change based on what flip server we are hosting on
     return f"http://127.0.0.1:12118/take_quiz/{link_id}"
 
 
-def get_quiz_id_from_link(unique_id):
-    """Retrieve the quizID associated with the provided linkID."""
-    query = """
-        SELECT quizID
-        FROM Results
-        WHERE linkID = %s
-    """
-    db_connection = get_db_connection()  # Assuming you have a function to get the database connection
-    if db_connection:
-        cursor = execute_query(db_connection, query, (unique_id,))
-        if cursor:
-            result = cursor.fetchone()
-            db_connection.close()
-            if result:
-                return result['quizID']
-    return None
+# def get_quiz_id_from_link(unique_id):
+#     """Retrieve the quizID associated with the provided linkID."""
+#     query = """
+#         SELECT quizID
+#         FROM Results
+#         WHERE linkID = %s
+#     """
+#     db_connection = get_db_connection()  # Assuming you have a function to get the database connection
+#     if db_connection:
+#         cursor = execute_query(db_connection, query, (unique_id,))
+#         if cursor:
+#             result = cursor.fetchone()
+#             db_connection.close()
+#             if result:
+#                 return result['quizID']
+#     return None
 
 
 def send_email(name, email_address, message, link_id):
@@ -254,64 +253,64 @@ def send_quiz_results():
         return "Method Not Allowed", 405
 
 
-def get_responses_for_taker_quiz_by_link_id(link_id):
-    db_connection = get_db_connection()
-    cursor = db_connection.cursor(dictionary=True)
-    try:
-        # Assuming you have a SQL query to fetch responses based on the link_id
-        cursor.execute("""
-            SELECT R.*, Q.details AS question_details
-            FROM Response R
-            JOIN Question Q ON R.questionID = Q.questionID
-            WHERE R.linkID = %s;
-        """, (link_id,))
-        responses = cursor.fetchall()
-    except Exception as e:
-        print(f"An error occurred while fetching responses: {e}")
-        responses = []
-    finally:
-        cursor.close()
-        db_connection.close()
-    return responses
+# def get_responses_for_taker_quiz_by_link_id(link_id):
+#     db_connection = get_db_connection()
+#     cursor = db_connection.cursor(dictionary=True)
+#     try:
+#         # Assuming you have a SQL query to fetch responses based on the link_id
+#         cursor.execute("""
+#             SELECT R.*, Q.details AS question_details
+#             FROM Response R
+#             JOIN Question Q ON R.questionID = Q.questionID
+#             WHERE R.linkID = %s;
+#         """, (link_id,))
+#         responses = cursor.fetchall()
+#     except Exception as e:
+#         print(f"An error occurred while fetching responses: {e}")
+#         responses = []
+#     finally:
+#         cursor.close()
+#         db_connection.close()
+#     return responses
 
 
-def get_taker_email_and_responses(link_id):
-    db_connection = get_db_connection()
-    cursor = db_connection.cursor(dictionary=True)
-    try:
-        # Fetching taker's email using link_id
-        cursor.execute("""
-            SELECT QT.takerEmail
-            FROM Results R
-            JOIN Quiz_Taker QT ON R.takerID = QT.takerID
-            WHERE R.linkID = %s;
-        """, (link_id,))
-        result = cursor.fetchone()
-        if result:
-            taker_email = result['takerEmail']
-        else:
-            taker_email = 'Unknown'
+# def get_taker_email_and_responses(link_id):
+#     db_connection = get_db_connection()
+#     cursor = db_connection.cursor(dictionary=True)
+#     try:
+#         # Fetching taker's email using link_id
+#         cursor.execute("""
+#             SELECT QT.takerEmail
+#             FROM Results R
+#             JOIN Quiz_Taker QT ON R.takerID = QT.takerID
+#             WHERE R.linkID = %s;
+#         """, (link_id,))
+#         result = cursor.fetchone()
+#         if result:
+#             taker_email = result['takerEmail']
+#         else:
+#             taker_email = 'Unknown'
         
-        # Fetch responses for the link_id
-        # Assuming this part is done in a separate function or logic
-        responses = get_responses_for_taker_quiz_by_link_id(link_id)
+#         # Fetch responses for the link_id
+#         # Assuming this part is done in a separate function or logic
+#         responses = get_responses_for_taker_quiz_by_link_id(link_id)
 
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        taker_email = 'Error fetching email'
-        responses = []
+#     except Exception as e:
+#         print(f"An error occurred: {e}")
+#         taker_email = 'Error fetching email'
+#         responses = []
 
-    finally:
-        cursor.close()
-        db_connection.close()
+#     finally:
+#         cursor.close()
+#         db_connection.close()
     
-    return taker_email, responses
+#     return taker_email, responses
 
 
-def send_quiz_results_email(quiz_creator_email, quiz_title, link_id):
+def send_quiz_results_email(quiz_creator_email, quiz_taker, link_id):
     # Generate URL for viewing quiz results
-    results_url = url_for('taker_reponses', link_id=link_id, _external=True)
-    
+    results_url = url_for('results.show_taker_responses', link_id=link_id, _external=True)
+
     # Define the email message
     email_data = {
         'Messages': [
@@ -326,8 +325,8 @@ def send_quiz_results_email(quiz_creator_email, quiz_title, link_id):
                         'Name': 'Quiz Creator'
                     }
                 ],
-                'Subject': f'Results for "{quiz_title}" Quiz',
-                'TextPart': f'Hello,\n\nHere are the results for the "{quiz_title}" Quiz.\n\n'
+                'Subject': f'Results for "{quiz_taker}" Quiz',
+                'TextPart': f'Hello,\n\nHere are the results for the "{quiz_taker}" Quiz.\n\n'
                             f'You can view the results by clicking on the following link:\n{results_url}'
             }
         ]
@@ -344,60 +343,25 @@ def send_quiz_results_email(quiz_creator_email, quiz_title, link_id):
         print(response.json())
 
 
-def store_link_quiz_association(link_id, quiz_id):
-    query = """
-        INSERT INTO Results (linkID, quizID, takerID, timeTaken)
-        VALUES (%s, %s, DEFAULT, NULL)
-    """
-    db_connection = get_db_connection()
-    if db_connection:
-        try:
-            cursor = db_connection.cursor()
-            cursor.execute(query, (link_id, quiz_id))
-            db_connection.commit()
-        except Exception as e:
-            print(f"Error storing link-quiz association: {e}")
-            db_connection.rollback()
-        finally:
-            cursor.close()
-            db_connection.close()
-    else:
-        print("Error: Unable to connect to the database.")
-
-
-@bp.route('/take_quiz/<unique_id>', methods=['GET'])
-def take_quiz(unique_id):
-    # Retrieve the associated quizID from the database based on the unique_id
-    quiz_id = get_quiz_id_from_link(unique_id)
-    if quiz_id:
-        # Construct SQL query to retrieve quiz data based on the quiz_id
-        query = """
-            SELECT Quiz.*, Question.*, Answers.*
-            FROM Quiz
-            INNER JOIN Question ON Quiz.quizID = Question.quizID
-            INNER JOIN Answers ON Question.questionID = Answers.questionID
-            WHERE Quiz.quizID = %s
-        """
-        
-        # Attempt to get database connection
-        db_connection = get_db_connection()
-        if db_connection:
-            # Execute the SQL query
-            cursor = execute_query(db_connection, query, (quiz_id,))
-            if cursor:
-                quiz_data = cursor.fetchall()  # Fetch all quiz data from the cursor
-                if quiz_data:
-                    # Pass quiz_data to the template for rendering
-                    return render_template('take_quiz.html', quiz_data=quiz_data, link_id=unique_id)
-                else:
-                    return "Quiz not found or expired."  # Handle invalid quiz link
-            else:
-                return "Error: Unable to fetch quiz data from the database."  # Handle database query error
-        else:
-            return "Error: Unable to connect to the database."  # Handle database connection error
-    else:
-        return "Quiz link not found or expired."  # Handle invalid quiz link
-
+# def store_link_quiz_association(link_id, quiz_id):
+#     query = """
+#         INSERT INTO Results (linkID, quizID, takerID, timeTaken)
+#         VALUES (%s, %s, DEFAULT, NULL)
+#     """
+#     db_connection = get_db_connection()
+#     if db_connection:
+#         try:
+#             cursor = db_connection.cursor()
+#             cursor.execute(query, (link_id, quiz_id))
+#             db_connection.commit()
+#         except Exception as e:
+#             print(f"Error storing link-quiz association: {e}")
+#             db_connection.rollback()
+#         finally:
+#             cursor.close()
+#             db_connection.close()
+#     else:
+#         print("Error: Unable to connect to the database.")
 
 
 @bp.route('/email_sent', methods=['GET', 'POST'])
