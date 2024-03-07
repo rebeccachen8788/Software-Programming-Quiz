@@ -19,9 +19,6 @@ class DynamicQuizForm(FlaskForm):
 
 @bp.route('/take_quiz/<int:linkID>', methods=['GET', 'POST'])
 def show_quiz(linkID):
-    if request.method == 'GET':
-        # Redirect to start_quiz instead of showing the quiz directly
-        return redirect(url_for('start_quiz.start_quiz', linkID=linkID))
     global answer_details
     db = get_db_connection()
     cursor = db.cursor(dictionary=True)
