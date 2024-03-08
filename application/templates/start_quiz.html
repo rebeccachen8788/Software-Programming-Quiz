@@ -19,7 +19,7 @@
                 <div class="col-sm-6">
                      <!-- Start Quiz Form -->
                      {% if linkID %}
-                    <form id="start-quiz-form" method="post" action="{{ url_for('take_quiz.show_quiz', linkID=linkID) }}">
+                    <form id="start-quiz-form" method="get" action="{{ url_for('take_quiz.show_quiz', linkID=linkID) }}">
                         <!-- Include linkID as hidden field to support POST method -->
                         <input type="hidden" name="linkID" value="{{ linkID }}">
                         <h3>Start the Quiz</h3>
