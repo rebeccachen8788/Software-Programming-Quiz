@@ -20,8 +20,8 @@ def create_app(test_config=None):
     from . import create_quiz
     app.register_blueprint(create_quiz.bp)
     
-    from . import email
-    app.register_blueprint(email.bp)
+    from . import email_func
+    app.register_blueprint(email_func.bp)
 
     from . import take_quiz
     app.register_blueprint(take_quiz.bp)
@@ -40,7 +40,7 @@ def create_app(test_config=None):
         if 'user_id' in session:
             return redirect(url_for('creator_homepage.creator_homepage'))
         return render_template("homepage.html")
-    
+
     from . import start_quiz
     app.register_blueprint(start_quiz.bp)
 
