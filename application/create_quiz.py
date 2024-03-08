@@ -2,7 +2,7 @@
 
 from flask import flash, get_flashed_messages, Blueprint, render_template, redirect, session, url_for, request
 from flask_wtf import FlaskForm, Form
-from wtforms import BooleanField, FieldList, FormField, IntegerField, RadioField, SelectField, StringField
+from wtforms import BooleanField, FieldList, FormField, IntegerField, RadioField, SelectField, StringField, SubmitField
 from wtforms.validators import InputRequired, Length
 from wtforms.widgets import NumberInput
 
@@ -23,8 +23,10 @@ class QuestionForm(Form):
     
 class QuizForm(FlaskForm):
     # Parent form
+    quizName = StringField('Quiz Name', validators=[InputRequired(), Length(max=200)], description="Name your quiz")
     timer = IntegerField('Time Limit', description="minutes", widget=NumberInput(min=5, max=180), validators=[InputRequired()])
     questions = FieldList(FormField(QuestionForm))
+    submit = SubmitField('Create Quiz')
  
 @bp.route('/create_quiz', methods=['GET', 'POST'])
 @login_required # prevents unauthenticated users from accessing this page
@@ -46,8 +48,8 @@ def create_quiz():
             quiz_id = cursor.fetchone()[0]
 
             # set time limit for quiz
-            query = "UPDATE Quiz SET time = %s WHERE quizID = %s"
-            cursor.execute(query, (form.timer.data, quiz_id))
+            query = "UPDATE Quiz SET time = %s, title = %s WHERE quizID = %s"
+            cursor.execute(query, (form.timer.data, form.quizName.data, quiz_id))
             seen_questions = set()
             # Loop over each question in the form and insert into the database
             for key, value in request.form.items():
@@ -99,4 +101,10 @@ def create_quiz():
         except Exception as e:
             flash((e, 'danger'))
             return redirect(url_for('create_quiz.create_quiz'))
-    return render_template('create_quiz.html', form=form, message=get_flashed_messages())
+    else: 
+        # handle form validation errors as flash message
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash((error, 'warning'))
+            
+    return render_template('create_quiz.html', form=form)

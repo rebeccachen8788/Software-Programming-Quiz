@@ -1,7 +1,7 @@
 <!-- Source for timer: https://www.w3schools.com/howto/howto_js_countdown.asp#gsc.tab=0 -->
 <!DOCTYPE html>
 <html lang="en">
-{% extends "base.html" %}
+{% extends "taker_base.html" %}
 {% block title %}Quiz{% endblock %}
 {% block head %}
   {{ super() }}
@@ -64,7 +64,7 @@
 <script>
     // countdown timer that submits quiz when time runs out
     function timer() {
-        var deadline = new Date().getTime() + ({{time_limit}}) + 2000;
+        var deadline = new Date().getTime() + {{ time_limit|tojson }} + 2000;
         var x = setInterval(function() {
             var now = new Date().getTime();
             var time_remaining = deadline - now;
