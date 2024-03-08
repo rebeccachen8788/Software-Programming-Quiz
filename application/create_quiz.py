@@ -5,7 +5,6 @@ from flask_wtf import FlaskForm, Form
 from wtforms import BooleanField, FieldList, FormField, IntegerField, RadioField, SelectField, StringField, SubmitField
 from wtforms.validators import InputRequired, Length
 from wtforms.widgets import NumberInput
-import traceback
 
 from .db_connector import get_db_connection
 from .auth import login_required
@@ -47,7 +46,7 @@ def create_quiz():
             # retrieve the quizID
             cursor.execute("SELECT LAST_INSERT_ID()")
             quiz_id = cursor.fetchone()[0]
-            
+
             seen_questions = set()
             # Loop over each question in the form and insert into the database
             for key, value in request.form.items():
@@ -97,7 +96,6 @@ def create_quiz():
             db.close()
             return redirect(url_for('creator_homepage.creator_homepage'))
         except Exception as e:
-            traceback.print_exc()  # Add this line to print the exception traceback
             flash(('An error occurred while processing your request.', 'danger'))
             return redirect(url_for('create_quiz.create_quiz'))
     else: 
