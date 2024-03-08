@@ -20,19 +20,9 @@
               <!-- display alerts -->
               {% for message in get_flashed_messages() %}
                   {% if message %}
-                    {% if message.startswith("Signup Successful") or message=="You have been logged out." %}
-                        <div class="alert alert-success" role="alert">
-                          {{ message }}
-                        </div>
-                    {% elif message.startswith("Email") or message.startswith("Incorrect password") %} 
-                        <div class="alert alert-warning" role="alert">
-                          {{ message }}
-                        </div>      
-                    {% else %}           
-                        <div class="alert alert-danger" role="alert">
-                          {{ message }}
-                        </div>
-                    {% endif %}    
+                      <div class="alert alert-{{message[1]}}" role="alert">
+                        {{ message[0] }}
+                      </div>   
                   {% endif %}                        
               {% endfor %}
                 <div class="row">
@@ -49,7 +39,7 @@
                               {{ loginForm.password.label }} 
                                   {{ loginForm.password(class="form-control form-control-md", placeholder="Password")}}
                               <br />
-                              {{ loginForm.submit() }}
+                              {{ loginForm.submit(class="btn btn-primary") }}
                                 <br />
                           </form>
                         </div> 
@@ -93,7 +83,7 @@
                                   {{ signupForm.password2.label }} {{ signupForm.password2(class="form-control form-control-md", placeholder="Confirm Password")}}
                                 {% endif %}
                               <br />
-                              {{ signupForm.submit() }}
+                              {{ signupForm.submit(class="btn btn-primary") }}
                               <br />     
                     </div>
                 </div>

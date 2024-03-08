@@ -1,9 +1,9 @@
 # Adapted from https://www.rmedgar.com/blog/dynamic-fields-flask-wtf/ with the help of chatGPT
 
-from flask import flash, Blueprint, render_template, redirect, session, url_for, request
+from flask import flash, get_flashed_messages, Blueprint, render_template, redirect, session, url_for, request
 from flask_wtf import FlaskForm, Form
 from wtforms import BooleanField, FieldList, FormField, IntegerField, RadioField, SelectField, StringField
-from wtforms.validators import InputRequired, Length, ValidationError
+from wtforms.validators import InputRequired, Length
 from wtforms.widgets import NumberInput
 
 from .db_connector import get_db_connection
@@ -22,7 +22,7 @@ class QuestionForm(Form):
     answers = FieldList(StringField('answer'), validators=[InputRequired(), Length(max=500)], min_entries=4, max_entries=4) 
     
 class QuizForm(FlaskForm):
-    # Parent form - will need to implement timer, and anything else we need for the quiz
+    # Parent form
     timer = IntegerField('Time Limit', description="minutes", widget=NumberInput(min=5, max=180), validators=[InputRequired()])
     questions = FieldList(FormField(QuestionForm))
  
@@ -95,10 +95,8 @@ def create_quiz():
             db.commit()
             cursor.close()
             db.close()
-            print('Quiz created successfully!')
-            return redirect(url_for('root'))
+            return redirect(url_for('creator_homepage.creator_homepage'))
         except Exception as e:
-            print(e)
-            flash('An error occurred while creating the quiz. Please try again.')
+            flash((e, 'danger'))
             return redirect(url_for('create_quiz.create_quiz'))
-    return render_template('create_quiz.html', form=form)
+    return render_template('create_quiz.html', form=form, message=get_flashed_messages())

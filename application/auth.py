@@ -1,7 +1,7 @@
 # Source: https://flask.palletsprojects.com/en/2.3.x/tutorial/views/
 # Accessed 2/2/24
 
-from flask import Blueprint, flash, g, redirect, render_template, request, session, url_for
+from flask import Blueprint, flash, g, redirect, render_template, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 import functools
 from .db_connector import get_db_connection
@@ -26,13 +26,10 @@ class SignupForm(FlaskForm):
     
 # User sign up
 @bp.route('/signup', methods=['GET', 'POST'])
-def signup(flashMessage = None):
-    # display flash message if there is one
-    if flashMessage:
-        flash(flashMessage, "\n")
-        
+def signup():
     signupForm = SignupForm()
     loginForm = LoginForm()
+    flashMessage = None
 
     # if the form is submitted, validate the data and insert the new user into the database
     if signupForm.validate_on_submit():
@@ -48,12 +45,12 @@ def signup(flashMessage = None):
             cursor = db.cursor()
             cursor.execute(query, (email, secure_password, fn, ln))
             db.commit()
-            flashMessage = "Signup Successful! Please log in to access your account."          
+            flashMessage = ("Signup Successful! Please log in to access your account.", 'success')      
         except Exception as e:
             if 'Duplicate entry' in str(e):
-                flashMessage = "Email already in use. Please log in or use a different email address."
+                flashMessage = ("Email already in use. Please log in or use a different email address.", 'warning')
             else:
-                flashMessage = e
+                flashMessage = (e, 'danger')
         finally:
             cursor.close()
             db.close()
@@ -65,7 +62,7 @@ def signup(flashMessage = None):
         # handle form validation errors as flash message for consistency
         for field, errors in signupForm.errors.items():
             for error in errors:
-                flashMessage = f"{error}"
+                flashMessage = (error, 'warning')
                 flash(flashMessage)      
     return render_template('/login-signup.html', loginForm=loginForm, signupForm=signupForm)
       
@@ -84,7 +81,7 @@ def login(flashMessage = None):
         email = loginForm.email.data
         password = loginForm.password.data
         try: 
-            query = "SELECT creatorID, firstName, password FROM Quiz_Creator WHERE creatorEmail = %s;"
+            query = "SELECT * FROM Quiz_Creator WHERE creatorEmail = %s;"
             db = get_db_connection()
             cursor = db.cursor(dictionary=True)
             cursor.execute(query, (email,)) 
@@ -92,19 +89,21 @@ def login(flashMessage = None):
             cursor.close()
             db.close()
         except Exception as e:
-            flashMessage = e
+            flashMessage = (e, 'danger')
         else:
             # if user not found, flash message
             if not user:
-                flashMessage = "Email not found. Please sign up for an account."
+                flashMessage = ("Email not found. Please sign up for an account.", 'warning')
             # if email exists, check if password is valid
             elif check_password_hash(user['password'], password):
                 session.clear()
                 session['user_id'] = user['creatorID']
                 session['user_name'] = user['firstName']
+                session['user_last_name'] = user['lastName']
+                session['user_email'] = user['creatorEmail']
                 return redirect(url_for('creator_homepage.creator_homepage'))
             else:
-                flashMessage = "Incorrect password. Please try again."
+                flashMessage = ("Incorrect password. Please try again.", 'warning')
         finally:
             if flashMessage:
                 flash(flashMessage)
@@ -116,7 +115,7 @@ def logout():
     session.clear()
     print("session cleared")
     # return to login page and display successful logout message
-    return login(flashMessage="You have been logged out.")
+    return login(flashMessage=("You have been logged out.", 'success'))
 
 # checks if a user id is stored in the session
 @bp.before_app_request
@@ -138,7 +137,7 @@ def login_required(view):
     @functools.wraps(view)
     def wrapped_view(**kwargs):
         if not g.user:
-            return signup(flashMessage="Please login or signup to access your account.")
+            return redirect(url_for('root'))
         return view(**kwargs)
     
     return wrapped_view
