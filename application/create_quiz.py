@@ -5,6 +5,7 @@ from flask_wtf import FlaskForm, Form
 from wtforms import BooleanField, FieldList, FormField, IntegerField, RadioField, SelectField, StringField, SubmitField
 from wtforms.validators import InputRequired, Length
 from wtforms.widgets import NumberInput
+import traceback
 
 from .db_connector import get_db_connection
 from .auth import login_required
@@ -41,15 +42,12 @@ def create_quiz():
             cursor = db.cursor()
             
             # create new quiz entry for user
-            cursor.execute("INSERT INTO Quiz (creatorID, time) VALUES (%s, %s)", (creatorID, 0))
+            cursor.execute("INSERT INTO Quiz (creatorID, title, time) VALUES (%s, %s, %s)", (creatorID, form.quizName.data, form.timer.data))
             
             # retrieve the quizID
             cursor.execute("SELECT LAST_INSERT_ID()")
             quiz_id = cursor.fetchone()[0]
-
-            # set time limit for quiz
-            query = "UPDATE Quiz SET time = %s, title = %s WHERE quizID = %s"
-            cursor.execute(query, (form.timer.data, form.quizName.data, quiz_id))
+            
             seen_questions = set()
             # Loop over each question in the form and insert into the database
             for key, value in request.form.items():
@@ -99,7 +97,8 @@ def create_quiz():
             db.close()
             return redirect(url_for('creator_homepage.creator_homepage'))
         except Exception as e:
-            flash((e, 'danger'))
+            traceback.print_exc()  # Add this line to print the exception traceback
+            flash(('An error occurred while processing your request.', 'danger'))
             return redirect(url_for('create_quiz.create_quiz'))
     else: 
         # handle form validation errors as flash message
