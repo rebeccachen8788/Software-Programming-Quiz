@@ -64,29 +64,44 @@
 </html>
 
 <script>
-    // countdown timer that submits quiz when time runs out
-    function timer() {
-        var deadline = new Date().getTime() + {{ time_limit|tojson }} + 2000;
+    var sessionDeadline = 'deadline' + {{ quizID|tojson }}; 
+
+    // a timer that starts when the page is loaded and submits quiz when time is up
+    function timer() {                    
+        // get deadline from session storage
+        console.log( "time limit: ", {{ time_limit|tojson }})
+
+        var storedDeadline = sessionStorage.getItem(sessionDeadline);
+        var deadline
+        if (sessionStorage.getItem(sessionDeadline) === null) {
+            console.log("setting deadline");
+            var deadline = new Date();
+            deadline.setMinutes(deadline.getMinutes() + {{ time_limit|tojson }});
+            sessionStorage.setItem(sessionDeadline, deadline);
+        }
+        quizDeadline = sessionStorage.getItem(sessionDeadline);
+        console.log("quizDeadline: ", quizDeadline)
+        
+        // countdown from www.w3schools.com/howto/howto_js_countdown.asp
         var x = setInterval(function() {
             var now = new Date().getTime();
-            var time_remaining = deadline - now;
+            var time_remaining = new Date(quizDeadline).getTime() - now;
             var hours = Math.floor((time_remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             var minutes = Math.floor((time_remaining % (1000 * 60 * 60)) / (1000 * 60));
             var seconds = Math.floor((time_remaining % (1000 * 60)) / 1000);
             document.getElementById("timer").innerHTML = hours + "h " + minutes + "m " + seconds + "s ";
-            if (time_remaining < 0) {
+            if (time_remaining <= 0) {
                 $('form').submit();
             }
         }, 1000);
     }
-    timer();
-
-    // send time used to server when form is submitted
+    
     $(document).ready(function() {
+        // start or resume timer on page load
+        timer();
         $('form').submit(function() {
-            var time_remaining;
+            // clear session storage and add time remaining to form
             time_remaining = document.getElementById("timer").innerHTML;
-            // convert time_remaining to time_used, using the same format as time_remaining: hours, minutes, seconds
             time_remaining = time_remaining.split(" ");
             var timeRemainingInput = $("<input>").attr({
                 type: "hidden",
@@ -94,6 +109,7 @@
                 value: time_remaining
             });
             $('form').append(timeRemainingInput);
+            sessionStorage.removeItem(sessionDeadline);
         });    
     })
 </script>
