@@ -118,7 +118,7 @@ def get_responses_for_taker_quiz_by_link_id(link_id):
         try:
             cursor.execute(query, (link_id,))
             responses = cursor.fetchall()
-        except Error as e:
+        except Exception as e:
             print(f"Error fetching responses for link ID {link_id}: {e}")
         finally:
             cursor.close()
