@@ -19,7 +19,7 @@
 <body>
 <div class="container p-3 mb-5">
     <!-- Quiz-->
-    <h2 class="mb-4">Quiz</h2>
+    <h2 class="mb-4">{{ quiz_title }}</h2>
     <form method="POST" action="">
         {{ form.hidden_tag() }}
         {% for field_name, field in form._fields.items() %}
