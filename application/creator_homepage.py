@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 
 from .db_connector import get_db_connection
 from .auth import login_required
@@ -10,7 +10,7 @@ bp = Blueprint('creator_homepage', __name__)
 def creator_homepage():
     db = get_db_connection()
     cursor = db.cursor(dictionary=True)
-    cursor.execute("SELECT quizID FROM Quiz")
+    cursor.execute("SELECT * FROM Quiz WHERE creatorID = %s", (session['user_id'],))
     quizzes = cursor.fetchall()
     cursor.close()
     db.close()

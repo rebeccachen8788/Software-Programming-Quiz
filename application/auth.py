@@ -129,8 +129,10 @@ def load_logged_in_user():
         cursor = db.cursor(dictionary=True)
         cursor.execute(query, (user_id,))
         g.user = cursor.fetchone()
+        if not g.user:
+            session.clear()
         cursor.close()
-        db.close()
+        db.close()        
 
 # redirects to login/signup page if user is not authenticated when @login_required decorator used
 def login_required(view):
