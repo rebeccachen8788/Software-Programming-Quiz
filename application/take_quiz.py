@@ -39,6 +39,11 @@ def show_quiz(linkID):
             return render_template('error_page.html')
         quizID = result[0]['quizID']
 
+    # Fetch title of the quiz
+    cursor.execute("SELECT title FROM Quiz WHERE quizID = %s", (quizID,))
+    quiz = cursor.fetchone()
+    quiz_title = quiz['title']
+
     # Fetch time limit for the quiz
     cursor.execute("SELECT time FROM Quiz WHERE quizID = %s", (quizID,))
     data = cursor.fetchone()
@@ -188,7 +193,7 @@ def show_quiz(linkID):
         cursor.close()
         db.close()
         # Handling GET request or invalid form submission
-        return render_template('take_quiz.html', form=form, quizID=quizID, time_limit = time)
+        return render_template('take_quiz.html', form=form, quizID=quizID, time_limit = time, quiz_title=quiz_title)
 
 def calculate_time_used(time, time_remaining):
     # split time_remaining by both letter and comma, leaving just ints
