@@ -26,11 +26,11 @@ def get_quiz_results_for_creator(creator_id):
         cursor.execute(query, (creator_id,))
         results = cursor.fetchall()
         for result in results:
-            result['totalScore'] = int(result['totalScore'])
+            result['totalScore'] = int(result['totalScore']) if result['totalScore'] is not None else 0
         
         # Sorting the results by totalScore
         sorted_results = sorted(results, key=lambda x: x['totalScore'], reverse=True)
-    except Error as e:
+    except Exception as e:
         print(f"Error fetching quiz results for creator {creator_id}: {e}")
         return []
     finally:

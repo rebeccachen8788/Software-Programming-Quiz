@@ -167,19 +167,21 @@ def show_quiz(linkID):
 
             # Fetch quiz creator's email using the quizID associated with the linkID in the Results table
             cursor.execute("""
-                SELECT creatorID
+                SELECT creatorID, title
                 FROM Quiz
                 WHERE quizID = (
                     SELECT quizID FROM Results WHERE linkID = %s
                 )
             """, (linkID,))
-            creator_id = cursor.fetchone()['creatorID']
+            quiz_info = cursor.fetchone()
+            creator_id = quiz_info['creatorID']
+            quiz_title = quiz_info['title']
 
             # Fetch creator's email using the creatorID from the Quiz_Creator table
             cursor.execute("SELECT creatorEmail FROM Quiz_Creator WHERE creatorID = %s", (creator_id,))
             creator_email = cursor.fetchone()['creatorEmail']
 
-            send_quiz_results_email(creator_email, quiz_taker_email, linkID)
+            send_quiz_results_email(creator_email, quiz_taker_email, linkID, quiz_title)
 
         except Exception as e:
             print(f"Error sending quiz results email: {e}")

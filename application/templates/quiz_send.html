@@ -34,7 +34,7 @@
                     <select class="form-control" name="quiz_id" required>
                         {% if quizzes %}
                             {% for quiz in quizzes %}
-                                <option value="{{ quiz['QuizID'] }}">Quiz: {{ quiz['QuizID'] }}</option>
+                                <option value="{{ quiz['QuizID'] }}">{{ quiz['Title'] }}</option>
                             {% endfor %}
                         {% else %}
                             <option value="" disabled>No quizzes available</option>
