@@ -71,24 +71,6 @@ def generate_quiz_link(link_id):
     return f"http://127.0.0.1:12118/start_quiz/{link_id}"
 
 
-# def get_quiz_id_from_link(unique_id):
-#     """Retrieve the quizID associated with the provided linkID."""
-#     query = """
-#         SELECT quizID
-#         FROM Results
-#         WHERE linkID = %s
-#     """
-#     db_connection = get_db_connection()  # Assuming you have a function to get the database connection
-#     if db_connection:
-#         cursor = execute_query(db_connection, query, (unique_id,))
-#         if cursor:
-#             result = cursor.fetchone()
-#             db_connection.close()
-#             if result:
-#                 return result['quizID']
-#     return None
-
-
 def send_email(name, email_address, message, link_id):
     quiz_link = generate_quiz_link(link_id)
 
@@ -136,27 +118,6 @@ def get_quiz_creator_email(quiz_id):
             if result:
                 return result['creatorEmail']
     return None
-
-# I think i might not need this function
-# def get_creator_id_from_quiz_id(quiz_id):
-#     """Retrieve the creator ID associated with the provided quiz ID."""
-#     # Convert quiz_id to integer
-#     quiz_id = int(quiz_id)
-    
-#     query = """
-#         SELECT creatorID
-#         FROM Quiz
-#         WHERE quizID = %s
-#     """
-#     db_connection = get_db_connection()
-#     if db_connection:
-#         cursor = execute_query(db_connection, query, (quiz_id,))
-#         if cursor:
-#             result = cursor.fetchone()
-#             db_connection.close()
-#             if result:
-#                 return result['creatorID']
-#     return None
 
 
 def fetch_user_quizzes(user_id):
@@ -224,90 +185,6 @@ def quiz_send():
         return render_template('quiz_send.html', quizzes=user_quizzes)
 
 
-# Might not need
-# Route to send quiz results
-# The following was grabbed and modified by the code from result.py on function show_taker_responses
-# @bp.route('/send_quiz_results', methods=['POST'])
-# def send_quiz_results():
-#     if request.method == 'POST':
-#         link_id = request.form.get('link_id')
-#         quiz_id = request.form.get('quiz_id')
-#         quiz_title = request.form.get('quiz_title')
-
-#         # Ensure link_id and quiz_id are provided
-#         if not link_id or not quiz_id:
-#             return "Link ID and Quiz ID are required.", 400
-        
-#         # Retrieve the quiz creator's email
-#         quiz_creator_email = get_quiz_creator_email(quiz_id)
-#         if not quiz_creator_email:
-#             return "Failed to send quiz results email. Quiz creator not found.", 404
-
-#         # Send quiz results email
-#         try:
-#             # Send email with the link to view quiz results
-#             send_quiz_results_email(quiz_creator_email, quiz_title, link_id)
-#             return "Quiz results email sent to the creator!"
-#         except Exception as e:
-#             return f"Failed to send quiz results email: {str(e)}", 500
-#     else:
-#         return "Method Not Allowed", 405
-
-
-# def get_responses_for_taker_quiz_by_link_id(link_id):
-#     db_connection = get_db_connection()
-#     cursor = db_connection.cursor(dictionary=True)
-#     try:
-#         # Assuming you have a SQL query to fetch responses based on the link_id
-#         cursor.execute("""
-#             SELECT R.*, Q.details AS question_details
-#             FROM Response R
-#             JOIN Question Q ON R.questionID = Q.questionID
-#             WHERE R.linkID = %s;
-#         """, (link_id,))
-#         responses = cursor.fetchall()
-#     except Exception as e:
-#         print(f"An error occurred while fetching responses: {e}")
-#         responses = []
-#     finally:
-#         cursor.close()
-#         db_connection.close()
-#     return responses
-
-
-# def get_taker_email_and_responses(link_id):
-#     db_connection = get_db_connection()
-#     cursor = db_connection.cursor(dictionary=True)
-#     try:
-#         # Fetching taker's email using link_id
-#         cursor.execute("""
-#             SELECT QT.takerEmail
-#             FROM Results R
-#             JOIN Quiz_Taker QT ON R.takerID = QT.takerID
-#             WHERE R.linkID = %s;
-#         """, (link_id,))
-#         result = cursor.fetchone()
-#         if result:
-#             taker_email = result['takerEmail']
-#         else:
-#             taker_email = 'Unknown'
-        
-#         # Fetch responses for the link_id
-#         # Assuming this part is done in a separate function or logic
-#         responses = get_responses_for_taker_quiz_by_link_id(link_id)
-
-#     except Exception as e:
-#         print(f"An error occurred: {e}")
-#         taker_email = 'Error fetching email'
-#         responses = []
-
-#     finally:
-#         cursor.close()
-#         db_connection.close()
-    
-#     return taker_email, responses
-
-
 def send_quiz_results_email(quiz_creator_email, quiz_taker, link_id, quiz_title):
     # Generate URL for viewing quiz results
     results_url = url_for('results.show_taker_responses', link_id=link_id, _external=True)
@@ -342,27 +219,6 @@ def send_quiz_results_email(quiz_creator_email, quiz_taker, link_id, quiz_title)
     else:
         print(f'Failed to send quiz results email to the creator. Status code: {response.status_code}')
         print(response.json())
-
-
-# def store_link_quiz_association(link_id, quiz_id):
-#     query = """
-#         INSERT INTO Results (linkID, quizID, takerID, timeTaken)
-#         VALUES (%s, %s, DEFAULT, NULL)
-#     """
-#     db_connection = get_db_connection()
-#     if db_connection:
-#         try:
-#             cursor = db_connection.cursor()
-#             cursor.execute(query, (link_id, quiz_id))
-#             db_connection.commit()
-#         except Exception as e:
-#             print(f"Error storing link-quiz association: {e}")
-#             db_connection.rollback()
-#         finally:
-#             cursor.close()
-#             db_connection.close()
-#     else:
-#         print("Error: Unable to connect to the database.")
 
 
 @bp.route('/email_sent', methods=['GET', 'POST'])
