@@ -166,12 +166,12 @@ def fetch_user_quizzes(user_id):
     if db_connection:
         try:
             # Execute a query to fetch quizzes for the given user ID
-            query = "SELECT quizID FROM Quiz WHERE creatorID = %s"
+            query = "SELECT quizID, title FROM Quiz WHERE creatorID = %s"
             cursor = db_connection.cursor()
             cursor.execute(query, (user_id,))
             
             # Fetch all rows as a list of dictionaries
-            quizzes = [{'QuizID': row[0]} for row in cursor.fetchall()]
+            quizzes = [{'QuizID': row[0], 'Title': f"{row[1]}. Quiz ID: {row[0]}"} for row in cursor.fetchall()]
             
             # Close cursor and database connection
             cursor.close()
@@ -192,8 +192,8 @@ def quiz_send():
         name = request.form.get('name')  # Assuming single name field
         email = request.form.get('email')  # Assuming single email field
         message = request.form.get('message')  # Assuming single message field
-        quiz_id = request.form['quiz_id']  # Assuming we get the quiz ID from the form
-
+        quiz_id = request.form.get('quiz_id')  # Assuming we get the quiz ID from the form
+    
         # Fetch the creator ID from the database using the quiz ID
         creator_id = session.get('user_id')
         if not creator_id:
@@ -217,40 +217,41 @@ def quiz_send():
         # Fetch quizzes created by the current user
         user_id = session.get('user_id')  # Assuming user ID is stored in session
         if user_id:
-            user_quizzes = fetch_user_quizzes(user_id)  # Implement this function according to your database structure
+            user_quizzes = fetch_user_quizzes(user_id)
         else:
             user_quizzes = []
         
         return render_template('quiz_send.html', quizzes=user_quizzes)
 
 
+# Might not need
 # Route to send quiz results
 # The following was grabbed and modified by the code from result.py on function show_taker_responses
-@bp.route('/send_quiz_results', methods=['POST'])
-def send_quiz_results():
-    if request.method == 'POST':
-        link_id = request.form.get('link_id')
-        quiz_id = request.form.get('quiz_id')
-        quiz_title = request.form.get('quiz_title')
+# @bp.route('/send_quiz_results', methods=['POST'])
+# def send_quiz_results():
+#     if request.method == 'POST':
+#         link_id = request.form.get('link_id')
+#         quiz_id = request.form.get('quiz_id')
+#         quiz_title = request.form.get('quiz_title')
 
-        # Ensure link_id and quiz_id are provided
-        if not link_id or not quiz_id:
-            return "Link ID and Quiz ID are required.", 400
+#         # Ensure link_id and quiz_id are provided
+#         if not link_id or not quiz_id:
+#             return "Link ID and Quiz ID are required.", 400
         
-        # Retrieve the quiz creator's email
-        quiz_creator_email = get_quiz_creator_email(quiz_id)
-        if not quiz_creator_email:
-            return "Failed to send quiz results email. Quiz creator not found.", 404
+#         # Retrieve the quiz creator's email
+#         quiz_creator_email = get_quiz_creator_email(quiz_id)
+#         if not quiz_creator_email:
+#             return "Failed to send quiz results email. Quiz creator not found.", 404
 
-        # Send quiz results email
-        try:
-            # Send email with the link to view quiz results
-            send_quiz_results_email(quiz_creator_email, quiz_title, link_id)
-            return "Quiz results email sent to the creator!"
-        except Exception as e:
-            return f"Failed to send quiz results email: {str(e)}", 500
-    else:
-        return "Method Not Allowed", 405
+#         # Send quiz results email
+#         try:
+#             # Send email with the link to view quiz results
+#             send_quiz_results_email(quiz_creator_email, quiz_title, link_id)
+#             return "Quiz results email sent to the creator!"
+#         except Exception as e:
+#             return f"Failed to send quiz results email: {str(e)}", 500
+#     else:
+#         return "Method Not Allowed", 405
 
 
 # def get_responses_for_taker_quiz_by_link_id(link_id):
@@ -307,7 +308,7 @@ def send_quiz_results():
 #     return taker_email, responses
 
 
-def send_quiz_results_email(quiz_creator_email, quiz_taker, link_id):
+def send_quiz_results_email(quiz_creator_email, quiz_taker, link_id, quiz_title):
     # Generate URL for viewing quiz results
     results_url = url_for('results.show_taker_responses', link_id=link_id, _external=True)
 
@@ -317,7 +318,7 @@ def send_quiz_results_email(quiz_creator_email, quiz_taker, link_id):
             {
                 'From': {
                     'Email': 'virgenlg@oregonstate.edu',
-                    'Name': 'Software Programming Quiz'
+                    'Name': 'Software Programming Quiz Results'
                 },
                 'To': [
                     {
@@ -326,8 +327,8 @@ def send_quiz_results_email(quiz_creator_email, quiz_taker, link_id):
                     }
                 ],
                 'Subject': f'Results for "{quiz_taker}" Quiz',
-                'TextPart': f'Hello,\n\nHere are the results for the "{quiz_taker}" Quiz.\n\n'
-                            f'You can view the results by clicking on the following link:\n{results_url}'
+                'TextPart': f'Hello,\n\nHere are the results for quiz {quiz_title} taken by "{quiz_taker}".\n\n'
+                            f'You can view the results by clicking on the following link:\n{results_url}\n'
             }
         ]
     }
@@ -337,7 +338,7 @@ def send_quiz_results_email(quiz_creator_email, quiz_taker, link_id):
 
     # Check if the request was successful
     if response.status_code == 200:
-        print('Quiz results email sent successfully to the creator!')
+        print(f'Quiz results email sent successfully to the creator: {quiz_creator_email}!')
     else:
         print(f'Failed to send quiz results email to the creator. Status code: {response.status_code}')
         print(response.json())

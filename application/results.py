@@ -30,7 +30,7 @@ def get_quiz_results_for_creator(creator_id):
         
         # Sorting the results by totalScore
         sorted_results = sorted(results, key=lambda x: x['totalScore'], reverse=True)
-    except Error as e:
+    except Exception as e:
         print(f"Error fetching quiz results for creator {creator_id}: {e}")
         return []
     finally:
