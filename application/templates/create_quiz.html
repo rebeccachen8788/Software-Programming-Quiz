@@ -123,6 +123,9 @@
     </div>
 
     <form id="quiz" method="POST" action="">
+    <div class="mb-3">
+        {{ form.quizName.label }} {{ form.quizName(class="form-control") }}
+    </div>
         <!-- Container to hold dynamically created subforms -->
     <div id="subforms-container" class="mx-auto p-3">
     </div>
@@ -150,12 +153,11 @@
         {% endif %}
     {% endfor %}
     <div id="error-message" class="alert alert-danger" style="display: none;"></div>
-    <button type="submit" id="submit" class="btn btn-primary">Submit Quiz</button>
+    {{ form.submit(class="btn btn-primary") }}
     <!-- Cancel button -->
     <a href="{{ url_for('root') }}" class="btn btn-secondary">Cancel</a>
     {{ form.csrf_token }}
     </form>
-
 </div>
 </html>
 
@@ -269,6 +271,12 @@ function validateForm() {
 
     var invalidQuestions = []; 
     var dynamicForms = document.querySelectorAll('#subforms-container .subform');
+    console.log(dynamicForms.length);
+    if (dynamicForms.length === 0) {
+        console.log('No questions found.');
+        errorMessage = "You must have at least one question.";
+        isValid = false;
+    }
 
     dynamicForms.forEach(function(form) {
         var checkboxes = form.querySelectorAll('input.check-all[type="checkbox"]');
@@ -283,6 +291,7 @@ function validateForm() {
 
         if (checkboxes.length > 0 && checkedCount === 0) {
             isValid = false;
+            errorMessage = "Please select at least one correct option for all questions.";
             questionId = form.getAttribute('id');
             //push question number to invalidQuestions array, without prefix
             invalidQuestions.push(questionId.replace('subform-', ''));
@@ -291,7 +300,6 @@ function validateForm() {
 
     // Display error message if there are invalid questions, otherwise clear errors
     if (!isValid) {
-        var errorMessage = "Please select at least one correct option for all questions.";
         $('#error-message').text(errorMessage).show();
     } else {
         $('#error-message').hide();
@@ -325,7 +333,7 @@ $(document).ready(function() {
             console.log('Form submission prevented due to validation errors.');
             event.preventDefault();
         } else {
-            console.log('Form submitted successfully.');
+            console.log('Answers are valid.');
         }
     });
 });

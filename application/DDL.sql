@@ -35,7 +35,8 @@ CREATE OR REPLACE TABLE Quiz_Taker (
 CREATE OR REPLACE TABLE Quiz (
     quizID INT AUTO_INCREMENT UNIQUE NOT NULL,
     creatorID INT NOT NULL,
-    time INT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    time INT NOT NULL CHECK(time >= 5 and time <= 180),
     PRIMARY KEY (quizID),
     FOREIGN KEY (creatorID) REFERENCES Quiz_Creator(creatorID) ON DELETE CASCADE
 );

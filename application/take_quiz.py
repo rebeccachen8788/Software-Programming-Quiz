@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import Blueprint, render_template, request, flash, redirect, session, url_for
 from flask_wtf import FlaskForm
 from wtforms import RadioField, SelectMultipleField, TextAreaField, SubmitField, widgets
 from wtforms.validators import Optional
@@ -51,7 +51,6 @@ def show_quiz(linkID):
         pass
 
     for question in questions:
-        print(question)
         field_name = f"question_{question['questionID']}"
         cursor.execute("SELECT * FROM Answers WHERE questionID = %s", (question['questionID'],))
         answers = cursor.fetchall()
@@ -175,7 +174,7 @@ def show_quiz(linkID):
         cursor.close()
         db.close()
         # Handling GET request or invalid form submission
-        return render_template('take_quiz.html', form=form, quizID=quizID, time_limit = time * 60 * 1000)
+        return render_template('take_quiz.html', form=form, quizID=quizID, time_limit = time)
 
 def calculate_time_used(time, time_remaining):
     # split time_remaining by both letter and comma, leaving just ints

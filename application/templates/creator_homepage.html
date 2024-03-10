@@ -42,16 +42,16 @@
           <table class="table table-sm table-bordered">
             <thead class="thead-dark">
               <tr>
-                  <th scope="col">Quiz ID</th>
+                  <th scope="col">Quiz Title</th>
                 <th scope="col">Details</th>
               </tr>
             </thead>
             <tbody>
               {% for quiz in quizzes %}
-              <tr>
-                <td>{{ quiz.quizID }}</td>
-                <td><a href="/quiz_details/{{ quiz.quizID }}" class="btn btn-info btn-sm">Details</a></td>
-              </tr>
+                <tr>
+                  <td>{{ quiz.title }}</td>
+                  <td><a href="/quiz_details/{{ quiz.quizID }}" class="btn btn-info btn-sm">Details</a></td>
+                </tr>
               {% endfor %}
             </tbody>
           </table>

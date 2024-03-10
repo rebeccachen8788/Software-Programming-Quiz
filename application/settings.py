@@ -107,6 +107,8 @@ def change_name():
             cursor = db.cursor()
             cursor.execute(query, (firstName, lastName, user_id))
             db.commit()
+            session['user_name'] = firstName
+            session['user_last_name'] = lastName
             flash(("Name updated successfully!", 'success'))
         except Exception as e:
             flash((e, 'danger'))
