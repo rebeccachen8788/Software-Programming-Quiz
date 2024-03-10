@@ -29,7 +29,7 @@
     <h1>Quiz Results - Sorted by Score</h1>
     {% for quizID, results in grouped_results.items() %}
         <div class="my-4">
-            <h2>Quiz ID: {{ quizID }}</h2>
+            <h2>Quiz: {{ results[0].quizTitle }} (ID: {{ quizID }})</h2>
             <select class="custom-select" onchange="redirectToTakerResponse(this.value);">
                 <option value="">Select Test Taker</option>
                 {% for takerID, takerEmail, linkID, totalScore in dropdown_data[quizID] %}
