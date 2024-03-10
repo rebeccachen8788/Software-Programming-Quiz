@@ -10,7 +10,7 @@ def get_quiz_results_for_creator(creator_id):
     Fetches all quiz results for quizzes created by the specified creatorID.
     """
     query = """
-    SELECT R.linkID, R.quizID, R.takerID, QT.takerEmail, R.timeTaken, R.totalScore, R.completed, Q.time as quizTime
+    SELECT R.linkID, R.quizID, R.takerID, QT.takerEmail, R.timeTaken, R.totalScore, R.completed, Q.time as quizTime, Q.title as quizTitle
     FROM Results R
     JOIN Quiz Q ON R.quizID = Q.quizID
     JOIN Quiz_Taker QT ON R.takerID = QT.takerID
