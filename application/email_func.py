@@ -71,6 +71,24 @@ def generate_quiz_link(link_id):
     return f"http://127.0.0.1:12118/start_quiz/{link_id}"
 
 
+# def get_quiz_id_from_link(unique_id):
+#     """Retrieve the quizID associated with the provided linkID."""
+#     query = """
+#         SELECT quizID
+#         FROM Results
+#         WHERE linkID = %s
+#     """
+#     db_connection = get_db_connection()  # Assuming you have a function to get the database connection
+#     if db_connection:
+#         cursor = execute_query(db_connection, query, (unique_id,))
+#         if cursor:
+#             result = cursor.fetchone()
+#             db_connection.close()
+#             if result:
+#                 return result['quizID']
+#     return None
+
+
 def send_email(name, email_address, message, link_id):
     quiz_link = generate_quiz_link(link_id)
 
