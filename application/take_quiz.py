@@ -6,6 +6,7 @@ from .email_func import send_quiz_results_email
 import re
 
 from .db_connector import get_db_connection
+
 bp = Blueprint('take_quiz', __name__)
 
 
@@ -37,12 +38,12 @@ def show_quiz(linkID):
             flash('There was an issue retrieving your quiz. Please try again.', 'error')
             return render_template('error_page.html')
         quizID = result[0]['quizID']
-    
+
     # Fetch time limit for the quiz
     cursor.execute("SELECT time FROM Quiz WHERE quizID = %s", (quizID,))
     data = cursor.fetchone()
     time = data['time']
-    
+
     # Fetch questions for the quiz
     cursor.execute("SELECT * FROM Question WHERE quizID = %s", (quizID,))
     questions = cursor.fetchall()
@@ -73,6 +74,8 @@ def show_quiz(linkID):
             if field_name.startswith('question_'):
                 question_id = int(field_name.split('_')[1])
                 if isinstance(value, list):  # For fields that allow multiple answers like checkboxes
+                    if not value:
+                        responses.append((quizID, question_id, value))
                     for answer in value:
                         responses.append((quizID, question_id, answer))
                 else:  # For radio fields and text areas
@@ -82,8 +85,8 @@ def show_quiz(linkID):
         if time_remaining.startswith('-'):
             time_used = time
         else:
-            time_used = calculate_time_used(time, time_remaining = request.form.get('time_remaining'))
-        
+            time_used = calculate_time_used(time, time_remaining=request.form.get('time_remaining'))
+
         # Save responses to the database
         try:
             total_score = 0
@@ -94,39 +97,50 @@ def show_quiz(linkID):
 
                 if question:
                     if question[0]['type'] == "freeform":
-                        cursor.execute("INSERT INTO Response (linkID, questionID, response) VALUES (%s, %s, %s)",
-                                       (linkID, question_id, answer))
                         if answer:
                             total_score += int(question[0]['score'])
+                            cursor.execute("INSERT INTO Response (linkID, questionID, response) VALUES (%s, %s, %s)",
+                                           (linkID, question_id, answer))
+                        else:
+                            # If no answer provided
+                            cursor.execute("INSERT INTO Response (linkID, questionID, response) VALUES (%s, %s, %s)",
+                                           (linkID, question_id, "No response"))
                     else:
-                        cursor.execute("SELECT details, correct FROM Answers WHERE answerID = %s", (answer,))
-                        results = cursor.fetchall()
-                        if not results:
-                            continue
-                        answer_details = results[0]['details']
-                        is_correct = results[0]['correct']
-                        question_score = question[0]['score']
+                        # If no answer provided
+                        if not answer:
+                            cursor.execute("INSERT INTO Response (linkID, questionID, response) VALUES (%s, %s, %s)",
+                                           (linkID, question_id, "No response"))
+                        else:
+                            cursor.execute("SELECT details, correct FROM Answers WHERE answerID = %s", (answer,))
+                            results = cursor.fetchall()
+                            if not results:
+                                continue
+                            answer_details = results[0]['details']
+                            is_correct = results[0]['correct']
+                            question_score = question[0]['score']
 
-                        # if check-all, adjust how much each correct answer weigh
-                        if question[0]['type'] == "check-all":
-                            # find out how many correct answers
-                            cursor.execute("SELECT * FROM Answers WHERE questionID = %s AND correct = %s", (question_id, True,))
-                            all_answers = cursor.fetchall()
-                            # print("len of all answers for question:", question_id, len(all_answers))
-                            question_score = question_score / len(all_answers)
+                            # if check-all, adjust how much each correct answer weigh
+                            if question[0]['type'] == "check-all":
+                                # find out how many correct answers
+                                cursor.execute("SELECT * FROM Answers WHERE questionID = %s AND correct = %s",
+                                               (question_id, True,))
+                                all_answers = cursor.fetchall()
+                                # print("len of all answers for question:", question_id, len(all_answers))
+                                question_score = question_score / len(all_answers)
 
-                        # update the score
-                        if is_correct:
-                            total_score += question_score
-                        # submit to responses
-                        cursor.execute("INSERT INTO Response (linkID, questionID, response) VALUES (%s, %s, %s)",
-                                       (linkID, question_id, answer_details))
+                            # update the score
+                            if is_correct:
+                                total_score += question_score
+                            # submit to responses
+                            cursor.execute("INSERT INTO Response (linkID, questionID, response) VALUES (%s, %s, %s)",
+                                           (linkID, question_id, answer_details))
 
             # round to nearest double digits
             total_score = round(total_score, 2)
             # print(total_score)
             # add total score and update completed
-            cursor.execute("UPDATE Results SET totalScore = %s, completed = %s, timeTaken = %s WHERE linkID = %s", (total_score, True, time_used, linkID))
+            cursor.execute("UPDATE Results SET totalScore = %s, completed = %s, timeTaken = %s WHERE linkID = %s",
+                           (total_score, True, time_used, linkID))
             db.commit()
         except Exception as err:
             print(f"Error1: {err}")
@@ -155,7 +169,7 @@ def show_quiz(linkID):
                 )
             """, (linkID,))
             creator_id = cursor.fetchone()['creatorID']
-            
+
             # Fetch creator's email using the creatorID from the Quiz_Creator table
             cursor.execute("SELECT creatorEmail FROM Quiz_Creator WHERE creatorID = %s", (creator_id,))
             creator_email = cursor.fetchone()['creatorEmail']
