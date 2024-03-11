@@ -39,12 +39,18 @@
         </thead>
         <tbody>
             {% for response in responses %}
-            <tr class="{{ 'correct' if response.correct else 'incorrect' }}">
+            <tr class="{{ 'correct' if response.question_type == 'freeform' and response.response != None or response.correct else 'incorrect' }}">
                 <td>{{ response.question_details }}</td>
                 <td>{{ response.response or 'No response' }}</td>
-                <td>{{ 'Yes' if response.correct else 'No' }}</td>
+                <td>
+                    {% if response.question_type == 'freeform' %}
+                        {{ 'Not applicable' if response.response else 'No' }}
+                    {% else %}
+                        {{ 'Yes' if response.correct else 'No' }}
+                    {% endif %}
+                </td>
             </tr>
-            {% endfor %}
+        {% endfor %}
         </tbody>
     </table>
     {% else %}
