@@ -23,6 +23,7 @@
       }
       .correct { background-color: #ddffdd; }
       .incorrect { background-color: #ffdddd; }
+      .freeform { background-color: #f0d58b; }
   </style>
 {% endblock %}
 {% block content %}
@@ -39,12 +40,12 @@
         </thead>
         <tbody>
             {% for response in responses %}
-            <tr class="{{ 'correct' if response.question_type == 'freeform' and response.response != None or response.correct else 'incorrect' }}">
+            <tr class="{{ 'freeform' if response.question_type == 'freeform' else 'correct' if response.question_type != 'freeform' and response.response != None and response.correct else 'incorrect' }}">
                 <td>{{ response.question_details }}</td>
                 <td>{{ response.response or 'No response' }}</td>
                 <td>
                     {% if response.question_type == 'freeform' %}
-                        {{ 'Not applicable' if response.response else 'No' }}
+                        {{ 'Not applicable, points given if response exists' if response.response else 'No' }}
                     {% else %}
                         {{ 'Yes' if response.correct else 'No' }}
                     {% endif %}
