@@ -28,6 +28,7 @@
 {% block content %}
 <div class="container mt-5">
     <h1>Responses for Attempt ID: {{ link_id }} by {{ taker_email }}</h1>
+    {% if responses %}
     <table class="table">
         <thead class="thead-light">
             <tr>
@@ -40,12 +41,17 @@
             {% for response in responses %}
             <tr class="{{ 'correct' if response.correct else 'incorrect' }}">
                 <td>{{ response.question_details }}</td>
-                <td>{{ response.response }}</td>
+                <td>{{ response.response or 'No response' }}</td>
                 <td>{{ 'Yes' if response.correct else 'No' }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+    {% else %}
+    <div class="alert alert-info" role="alert">
+        This quiz has not been taken yet.
+    </div>
+    {% endif %}
     <a href="{{ url_for('results.show_results') }}" class="btn btn-secondary">Back to Results</a>
 </div>
 {% endblock %}
