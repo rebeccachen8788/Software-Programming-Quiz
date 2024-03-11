@@ -100,6 +100,7 @@ def get_responses_for_taker_quiz_by_link_id(link_id):
     query = """
     SELECT 
     Q.details AS question_details, 
+    Q.type AS question_type,
     R.response, 
     A.correct
     FROM 
