@@ -66,9 +66,8 @@ def insert_new_link_id(quiz_id, email):
 
 
 def generate_quiz_link(link_id):
-    # Generate quiz taking link based on database
-    #NOTE:Will need to change based on what flip server we are hosting on
-    return f"http://127.0.0.1:12118/start_quiz/{link_id}"
+    # Generate quiz taking link based on database and flip server
+    return f"http://flip3.engr.oregonstate.edu:12118/start_quiz/{link_id}"
 
 
 def send_email(name, email_address, message, link_id):
